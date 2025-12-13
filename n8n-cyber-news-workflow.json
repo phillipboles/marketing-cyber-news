@@ -1,0 +1,149 @@
+{
+  "name": "Cyber News RSS Aggregator",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 30
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://www.cisa.gov/news.xml",
+        "options": {}
+      },
+      "id": "fetch-cisa-rss",
+      "name": "Fetch CISA RSS",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [460, 200]
+    },
+    {
+      "parameters": {
+        "url": "https://www.bleepingcomputer.com/feed/",
+        "options": {}
+      },
+      "id": "fetch-bleeping-rss",
+      "name": "Fetch BleepingComputer RSS",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [460, 400]
+    },
+    {
+      "parameters": {
+        "url": "https://feeds.feedburner.com/TheHackersNews",
+        "options": {}
+      },
+      "id": "fetch-hackernews-rss",
+      "name": "Fetch HackerNews RSS",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [460, 600]
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={{ $json }}",
+        "options": {}
+      },
+      "id": "parse-xml",
+      "name": "Parse XML to JSON",
+      "type": "n8n-nodes-base.xml",
+      "typeVersion": 1,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Transform RSS items to ACI article format\nconst items = $input.all();\nconst articles = [];\n\nfor (const item of items) {\n  const data = item.json;\n  \n  // Handle different RSS structures\n  let rssItems = [];\n  if (data.rss && data.rss.channel && data.rss.channel.item) {\n    rssItems = Array.isArray(data.rss.channel.item) \n      ? data.rss.channel.item \n      : [data.rss.channel.item];\n  } else if (data.feed && data.feed.entry) {\n    rssItems = Array.isArray(data.feed.entry) \n      ? data.feed.entry \n      : [data.feed.entry];\n  }\n  \n  for (const rssItem of rssItems.slice(0, 5)) {\n    const title = rssItem.title || '';\n    const content = rssItem.description || rssItem.content || rssItem.summary || '';\n    const link = rssItem.link || rssItem.guid || '';\n    const pubDate = rssItem.pubDate || rssItem.published || new Date().toISOString();\n    \n    // Categorize based on keywords\n    let category = 'industry-news';\n    const lowerTitle = title.toLowerCase();\n    const lowerContent = content.toLowerCase();\n    \n    if (lowerTitle.includes('vulnerability') || lowerTitle.includes('cve')) {\n      category = 'vulnerabilities';\n    } else if (lowerTitle.includes('ransomware')) {\n      category = 'ransomware';\n    } else if (lowerTitle.includes('breach') || lowerTitle.includes('leak')) {\n      category = 'data-breaches';\n    } else if (lowerTitle.includes('malware') || lowerTitle.includes('trojan')) {\n      category = 'malware';\n    } else if (lowerTitle.includes('phishing') || lowerTitle.includes('scam')) {\n      category = 'phishing';\n    } else if (lowerTitle.includes('apt') || lowerTitle.includes('threat actor')) {\n      category = 'threat-actors';\n    }\n    \n    // Determine severity\n    let severity = 'medium';\n    if (lowerTitle.includes('critical') || lowerTitle.includes('urgent')) {\n      severity = 'critical';\n    } else if (lowerTitle.includes('high') || lowerTitle.includes('severe')) {\n      severity = 'high';\n    } else if (lowerTitle.includes('low')) {\n      severity = 'low';\n    }\n    \n    // Extract CVEs\n    const cvePattern = /CVE-\\d{4}-\\d+/gi;\n    const cves = title.match(cvePattern) || content.match(cvePattern) || [];\n    \n    // Generate tags from title\n    const stopWords = ['the', 'a', 'an', 'is', 'in', 'on', 'at', 'for', 'to', 'of', 'and', 'or'];\n    const tags = title.toLowerCase()\n      .split(/\\s+/)\n      .filter(word => word.length > 3 && !stopWords.includes(word))\n      .slice(0, 5);\n    \n    articles.push({\n      json: {\n        event_type: 'article.created',\n        data: {\n          title: title.substring(0, 500),\n          content: content.substring(0, 10000),\n          summary: content.substring(0, 300),\n          category_slug: category,\n          severity: severity,\n          tags: tags,\n          source_url: typeof link === 'string' ? link : (link._text || link.href || ''),\n          source_name: data.source || 'RSS Feed',\n          cves: [...new Set(cves)],\n          vendors: [],\n          skip_enrichment: false\n        }\n      }\n    });\n  }\n}\n\nreturn articles;"
+      },
+      "id": "transform-to-article",
+      "name": "Transform to Article Format",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:8080/v1/webhooks/n8n",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-N8N-Signature",
+              "value": "={{ $runIndex }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": []
+        },
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {}
+      },
+      "id": "send-to-aci",
+      "name": "Send to ACI Backend",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1120, 300]
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          { "node": "Fetch CISA RSS", "type": "main", "index": 0 },
+          { "node": "Fetch BleepingComputer RSS", "type": "main", "index": 0 },
+          { "node": "Fetch HackerNews RSS", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Fetch CISA RSS": {
+      "main": [
+        [{ "node": "Parse XML to JSON", "type": "main", "index": 0 }]
+      ]
+    },
+    "Fetch BleepingComputer RSS": {
+      "main": [
+        [{ "node": "Parse XML to JSON", "type": "main", "index": 0 }]
+      ]
+    },
+    "Fetch HackerNews RSS": {
+      "main": [
+        [{ "node": "Parse XML to JSON", "type": "main", "index": 0 }]
+      ]
+    },
+    "Parse XML to JSON": {
+      "main": [
+        [{ "node": "Transform to Article Format", "type": "main", "index": 0 }]
+      ]
+    },
+    "Transform to Article Format": {
+      "main": [
+        [{ "node": "Send to ACI Backend", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

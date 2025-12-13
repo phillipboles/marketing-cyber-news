@@ -1,0 +1,413 @@
+openapi: 3.0.3
+info:
+  title: ACI Webhooks API
+  description: Webhook endpoints for n8n integration
+  version: 1.0.0
+
+paths:
+  /v1/webhooks/n8n:
+    post:
+      summary: Process n8n webhook
+      operationId: processN8nWebhook
+      tags:
+        - Webhooks
+      parameters:
+        - name: X-N8N-Signature
+          in: header
+          required: true
+          schema:
+            type: string
+            pattern: '^sha256=[a-f0-9]{64}$'
+          description: HMAC-SHA256 signature
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebhookPayload'
+      responses:
+        '202':
+          description: Webhook accepted for processing
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookAcceptedResponse'
+        '400':
+          description: Invalid payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Invalid signature
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /v1/webhooks/n8n/trigger/{workflow}:
+    post:
+      summary: Trigger n8n workflow
+      operationId: triggerN8nWorkflow
+      tags:
+        - Webhooks
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: workflow
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [scrape-all, scrape-cisa, scrape-nvd, enrich-pending, generate-digest]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TriggerWorkflowRequest'
+      responses:
+        '200':
+          description: Workflow triggered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TriggerWorkflowResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Forbidden - admin only
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /v1/health:
+    get:
+      summary: Health check
+      operationId: healthCheck
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+        '503':
+          description: Service is unhealthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /v1/ready:
+    get:
+      summary: Readiness check
+      operationId: readinessCheck
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Service is ready
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadinessResponse'
+        '503':
+          description: Service is not ready
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadinessResponse'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  responses:
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+  schemas:
+    WebhookPayload:
+      type: object
+      required:
+        - event_type
+        - data
+      properties:
+        event_type:
+          type: string
+          enum: [article.created, article.updated, article.deleted, bulk.import, enrichment.complete]
+        data:
+          oneOf:
+            - $ref: '#/components/schemas/ArticleCreatedData'
+            - $ref: '#/components/schemas/ArticleUpdatedData'
+            - $ref: '#/components/schemas/ArticleDeletedData'
+            - $ref: '#/components/schemas/BulkImportData'
+            - $ref: '#/components/schemas/EnrichmentCompleteData'
+        metadata:
+          $ref: '#/components/schemas/WebhookMetadata'
+
+    ArticleCreatedData:
+      type: object
+      required:
+        - title
+        - content
+        - category_slug
+        - source_url
+      properties:
+        title:
+          type: string
+          maxLength: 500
+        content:
+          type: string
+        summary:
+          type: string
+        category_slug:
+          type: string
+        severity:
+          type: string
+          enum: [critical, high, medium, low, informational]
+          default: medium
+        tags:
+          type: array
+          items:
+            type: string
+        source_url:
+          type: string
+          format: uri
+        source_name:
+          type: string
+        published_at:
+          type: string
+          format: date-time
+        cves:
+          type: array
+          items:
+            type: string
+            pattern: '^CVE-\d{4}-\d+$'
+        vendors:
+          type: array
+          items:
+            type: string
+        skip_enrichment:
+          type: boolean
+          default: false
+
+    ArticleUpdatedData:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+          maxLength: 500
+        content:
+          type: string
+        summary:
+          type: string
+        severity:
+          type: string
+          enum: [critical, high, medium, low, informational]
+        tags:
+          type: array
+          items:
+            type: string
+        cves:
+          type: array
+          items:
+            type: string
+        vendors:
+          type: array
+          items:
+            type: string
+
+    ArticleDeletedData:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          format: uuid
+        reason:
+          type: string
+          example: duplicate
+
+    BulkImportData:
+      type: object
+      required:
+        - articles
+      properties:
+        articles:
+          type: array
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/ArticleCreatedData'
+
+    EnrichmentCompleteData:
+      type: object
+      required:
+        - article_id
+        - enrichment
+      properties:
+        article_id:
+          type: string
+          format: uuid
+        enrichment:
+          type: object
+          properties:
+            threat_type:
+              type: string
+              enum: [malware, ransomware, phishing, vulnerability, data_breach, apt, ddos, insider_threat, supply_chain, other]
+            attack_vector:
+              type: string
+            impact_assessment:
+              type: string
+            recommended_actions:
+              type: array
+              items:
+                type: string
+            threat_actors:
+              type: array
+              items:
+                type: string
+            iocs:
+              type: array
+              items:
+                type: object
+                properties:
+                  type:
+                    type: string
+                    enum: [ip, domain, hash, url]
+                  value:
+                    type: string
+                  context:
+                    type: string
+            confidence_score:
+              type: number
+              format: float
+              minimum: 0
+              maximum: 1
+
+    WebhookMetadata:
+      type: object
+      properties:
+        workflow_id:
+          type: string
+        execution_id:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+    WebhookAcceptedResponse:
+      type: object
+      properties:
+        accepted:
+          type: boolean
+          example: true
+        job_id:
+          type: string
+          format: uuid
+        message:
+          type: string
+          example: Webhook accepted for processing
+        articles_queued:
+          type: integer
+          description: Number of articles queued for processing
+
+    TriggerWorkflowRequest:
+      type: object
+      properties:
+        options:
+          type: object
+          properties:
+            max_articles:
+              type: integer
+              default: 50
+            since_date:
+              type: string
+              format: date-time
+
+    TriggerWorkflowResponse:
+      type: object
+      properties:
+        triggered:
+          type: boolean
+        workflow:
+          type: string
+        execution_id:
+          type: string
+        message:
+          type: string
+
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, unhealthy]
+        version:
+          type: string
+          example: 1.0.0
+        timestamp:
+          type: string
+          format: date-time
+
+    ReadinessResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [ready, not_ready]
+        checks:
+          type: object
+          properties:
+            database:
+              type: string
+              enum: [ok, error]
+            redis:
+              type: string
+              enum: [ok, error, skipped]
+            n8n:
+              type: string
+              enum: [ok, error, skipped]
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: object
+          required:
+            - code
+            - message
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            details:
+              type: object
+            request_id:
+              type: string
+              format: uuid

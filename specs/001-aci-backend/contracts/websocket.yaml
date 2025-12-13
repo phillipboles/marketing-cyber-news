@@ -1,0 +1,566 @@
+asyncapi: 2.6.0
+info:
+  title: ACI WebSocket API
+  version: 1.0.0
+  description: WebSocket protocol for real-time updates in Armor Cyber Intelligence
+
+servers:
+  production:
+    url: wss://api.aci.armor.com/ws
+    protocol: wss
+  staging:
+    url: wss://api-staging.aci.armor.com/ws
+    protocol: wss
+  development:
+    url: ws://localhost:8080/ws
+    protocol: ws
+
+channels:
+  /:
+    subscribe:
+      summary: Receive messages from server
+      message:
+        oneOf:
+          - $ref: '#/components/messages/Connected'
+          - $ref: '#/components/messages/AuthResult'
+          - $ref: '#/components/messages/SubscribeResult'
+          - $ref: '#/components/messages/UnsubscribeResult'
+          - $ref: '#/components/messages/Pong'
+          - $ref: '#/components/messages/Ack'
+          - $ref: '#/components/messages/Article'
+          - $ref: '#/components/messages/AlertMatch'
+          - $ref: '#/components/messages/Error'
+          - $ref: '#/components/messages/System'
+          - $ref: '#/components/messages/TokenExpiring'
+
+    publish:
+      summary: Send messages to server
+      message:
+        oneOf:
+          - $ref: '#/components/messages/Auth'
+          - $ref: '#/components/messages/Subscribe'
+          - $ref: '#/components/messages/Unsubscribe'
+          - $ref: '#/components/messages/Ping'
+          - $ref: '#/components/messages/MarkRead'
+
+components:
+  messages:
+    # Client Messages
+    Auth:
+      name: auth
+      title: Authentication
+      summary: Authenticate WebSocket connection
+      payload:
+        $ref: '#/components/schemas/AuthMessage'
+
+    Subscribe:
+      name: subscribe
+      title: Subscribe to channels
+      summary: Subscribe to real-time update channels
+      payload:
+        $ref: '#/components/schemas/SubscribeMessage'
+
+    Unsubscribe:
+      name: unsubscribe
+      title: Unsubscribe from channels
+      summary: Unsubscribe from channels
+      payload:
+        $ref: '#/components/schemas/UnsubscribeMessage'
+
+    Ping:
+      name: ping
+      title: Heartbeat ping
+      summary: Client heartbeat to keep connection alive
+      payload:
+        $ref: '#/components/schemas/PingMessage'
+
+    MarkRead:
+      name: mark_read
+      title: Mark article as read
+      summary: Mark an article as read for analytics
+      payload:
+        $ref: '#/components/schemas/MarkReadMessage'
+
+    # Server Messages
+    Connected:
+      name: connected
+      title: Connection established
+      summary: Sent after successful connection and authentication
+      payload:
+        $ref: '#/components/schemas/ConnectedMessage'
+
+    AuthResult:
+      name: auth_result
+      title: Authentication result
+      summary: Response to auth message
+      payload:
+        $ref: '#/components/schemas/AuthResultMessage'
+
+    SubscribeResult:
+      name: subscribe_result
+      title: Subscription result
+      summary: Confirmation of subscription request
+      payload:
+        $ref: '#/components/schemas/SubscribeResultMessage'
+
+    UnsubscribeResult:
+      name: unsubscribe_result
+      title: Unsubscription result
+      summary: Confirmation of unsubscription request
+      payload:
+        $ref: '#/components/schemas/UnsubscribeResultMessage'
+
+    Pong:
+      name: pong
+      title: Heartbeat pong
+      summary: Response to client ping
+      payload:
+        $ref: '#/components/schemas/PongMessage'
+
+    Ack:
+      name: ack
+      title: Acknowledgment
+      summary: Generic acknowledgment for client actions
+      payload:
+        $ref: '#/components/schemas/AckMessage'
+
+    Article:
+      name: article
+      title: Article notification
+      summary: New or updated article notification
+      payload:
+        $ref: '#/components/schemas/ArticleMessage'
+
+    AlertMatch:
+      name: alert_match
+      title: Alert match notification
+      summary: User's alert subscription matched a new article
+      payload:
+        $ref: '#/components/schemas/AlertMatchMessage'
+
+    Error:
+      name: error
+      title: Error notification
+      summary: Error notification
+      payload:
+        $ref: '#/components/schemas/ErrorMessage'
+
+    System:
+      name: system
+      title: System announcement
+      summary: System announcements and notifications
+      payload:
+        $ref: '#/components/schemas/SystemMessage'
+
+    TokenExpiring:
+      name: token_expiring
+      title: Token expiring warning
+      summary: Warning that the JWT token is about to expire
+      payload:
+        $ref: '#/components/schemas/TokenExpiringMessage'
+
+  schemas:
+    # Base message envelope
+    MessageEnvelope:
+      type: object
+      required:
+        - type
+        - id
+        - timestamp
+      properties:
+        type:
+          type: string
+        id:
+          type: string
+          format: uuid
+        timestamp:
+          type: string
+          format: date-time
+        payload:
+          type: object
+
+    # Client message payloads
+    AuthMessage:
+      allOf:
+        - $ref: '#/components/schemas/MessageEnvelope'
+        - type: object
+          properties:
+            type:
+              const: auth
+            payload:
+              type: object
+              required:
+                - token
+              properties:
+                token:
+                  type: string
+                  description: JWT access token
+
+    SubscribeMessage:
+      allOf:
+        - $ref: '#/components/schemas/MessageEnvelope'
+        - type: object
+          properties:
+            type:
+              const: subscribe
+            payload:
+              type: object
+              required:
+                - channels
+              properties:
+                channels:
+                  type: array
+                  items:
+                    type: string
+                  description: |
+                    Available channels:
+                    - articles:all
+                    - articles:critical
+                    - articles:high
+                    - articles:category:{slug}
+                    - articles:vendor:{name}
+                    - articles:cve:{id}
+                    - alerts:user
+                    - system
+
+    UnsubscribeMessage:
+      allOf:
+        - $ref: '#/components/schemas/MessageEnvelope'
+        - type: object
+          properties:
+            type:
+              const: unsubscribe
+            payload:
+              type: object
+              required:
+                - channels
+              properties:
+                channels:
+                  type: array
+                  items:
+                    type: string
+
+    PingMessage:
+      allOf:
+        - $ref: '#/components/schemas/MessageEnvelope'
+        - type: object
+          properties:
+            type:
+              const: ping
+
+    MarkReadMessage:
+      allOf:
+        - $ref: '#/components/schemas/MessageEnvelope'
+        - type: object
+          properties:
+            type:
+              const: mark_read
+            payload:
+              type: object
+              required:
+                - article_id
+              properties:
+                article_id:
+                  type: string
+                  format: uuid
+
+    # Server message payloads
+    ConnectedMessage:
+      allOf:
+        - $ref: '#/components/schemas/MessageEnvelope'
+        - type: object
+          properties:
+            type:
+              const: connected
+            payload:
+              type: object
+              properties:
+                connection_id:
+                  type: string
+                user_id:
+                  type: string
+                  format: uuid
+                server_time:
+                  type: string
+                  format: date-time
+                token_expires_at:
+                  type: string
+                  format: date-time
+
+    AuthResultMessage:
+      allOf:
+        - $ref: '#/components/schemas/MessageEnvelope'
+        - type: object
+          properties:
+            type:
+              const: auth_result
+            payload:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                user_id:
+                  type: string
+                  format: uuid
+                expires_at:
+                  type: string
+                  format: date-time
+                error:
+                  type: object
+                  properties:
+                    code:
+                      type: string
+                    message:
+                      type: string
+
+    SubscribeResultMessage:
+      allOf:
+        - $ref: '#/components/schemas/MessageEnvelope'
+        - type: object
+          properties:
+            type:
+              const: subscribe_result
+            payload:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                subscribed:
+                  type: array
+                  items:
+                    type: string
+                failed:
+                  type: array
+                  items:
+                    type: string
+                total_subscriptions:
+                  type: integer
+
+    UnsubscribeResultMessage:
+      allOf:
+        - $ref: '#/components/schemas/MessageEnvelope'
+        - type: object
+          properties:
+            type:
+              const: unsubscribe_result
+            payload:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                unsubscribed:
+                  type: array
+                  items:
+                    type: string
+                total_subscriptions:
+                  type: integer
+
+    PongMessage:
+      allOf:
+        - $ref: '#/components/schemas/MessageEnvelope'
+        - type: object
+          properties:
+            type:
+              const: pong
+
+    AckMessage:
+      allOf:
+        - $ref: '#/components/schemas/MessageEnvelope'
+        - type: object
+          properties:
+            type:
+              const: ack
+            payload:
+              type: object
+              properties:
+                success:
+                  type: boolean
+
+    ArticleMessage:
+      allOf:
+        - $ref: '#/components/schemas/MessageEnvelope'
+        - type: object
+          properties:
+            type:
+              const: article
+            payload:
+              type: object
+              properties:
+                event:
+                  type: string
+                  enum: [created, updated, deleted]
+                article:
+                  $ref: '#/components/schemas/ArticlePayload'
+                matched_channels:
+                  type: array
+                  items:
+                    type: string
+
+    ArticlePayload:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        slug:
+          type: string
+        summary:
+          type: string
+        category:
+          type: object
+          properties:
+            id:
+              type: string
+            name:
+              type: string
+            slug:
+              type: string
+            color:
+              type: string
+        severity:
+          type: string
+          enum: [critical, high, medium, low, informational]
+        tags:
+          type: array
+          items:
+            type: string
+        source_name:
+          type: string
+        related_cves:
+          type: array
+          items:
+            type: string
+        affected_vendors:
+          type: array
+          items:
+            type: string
+        armor_cta:
+          type: object
+          properties:
+            type:
+              type: string
+            title:
+              type: string
+            url:
+              type: string
+        reading_time_minutes:
+          type: integer
+        published_at:
+          type: string
+          format: date-time
+
+    AlertMatchMessage:
+      allOf:
+        - $ref: '#/components/schemas/MessageEnvelope'
+        - type: object
+          properties:
+            type:
+              const: alert_match
+            payload:
+              type: object
+              properties:
+                alert:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    name:
+                      type: string
+                    type:
+                      type: string
+                    value:
+                      type: string
+                article:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      format: uuid
+                    title:
+                      type: string
+                    slug:
+                      type: string
+                    severity:
+                      type: string
+                    category_slug:
+                      type: string
+                    published_at:
+                      type: string
+                      format: date-time
+                priority:
+                  type: string
+                  enum: [critical, high, normal]
+
+    ErrorMessage:
+      allOf:
+        - $ref: '#/components/schemas/MessageEnvelope'
+        - type: object
+          properties:
+            type:
+              const: error
+            payload:
+              type: object
+              properties:
+                code:
+                  type: string
+                  enum:
+                    - INVALID_TOKEN
+                    - TOKEN_EXPIRED
+                    - UNAUTHORIZED
+                    - INVALID_MESSAGE
+                    - INVALID_CHANNEL
+                    - SUBSCRIPTION_LIMIT
+                    - RATE_LIMITED
+                    - INTERNAL_ERROR
+                message:
+                  type: string
+                request_id:
+                  type: string
+                  format: uuid
+
+    SystemMessage:
+      allOf:
+        - $ref: '#/components/schemas/MessageEnvelope'
+        - type: object
+          properties:
+            type:
+              const: system
+            payload:
+              type: object
+              properties:
+                event:
+                  type: string
+                  enum: [maintenance, reconnect, token_expiring, rate_limited]
+                message:
+                  type: string
+                details:
+                  type: object
+                  properties:
+                    start_time:
+                      type: string
+                      format: date-time
+                    estimated_duration_seconds:
+                      type: integer
+                    action_required:
+                      type: string
+
+    TokenExpiringMessage:
+      allOf:
+        - $ref: '#/components/schemas/MessageEnvelope'
+        - type: object
+          properties:
+            type:
+              const: token_expiring
+            payload:
+              type: object
+              properties:
+                expires_at:
+                  type: string
+                  format: date-time
+                expires_in_seconds:
+                  type: integer
+                action:
+                  type: string
+                  const: refresh_token

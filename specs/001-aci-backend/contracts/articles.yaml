@@ -1,0 +1,739 @@
+openapi: 3.0.3
+info:
+  title: ACI Articles API
+  description: Article management endpoints for Armor Cyber Intelligence
+  version: 1.0.0
+
+paths:
+  /v1/articles:
+    get:
+      summary: List articles
+      operationId: listArticles
+      tags:
+        - Articles
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: category
+          in: query
+          schema:
+            type: string
+          description: Filter by category slug
+        - name: severity
+          in: query
+          schema:
+            $ref: '#/components/schemas/Severity'
+        - name: source
+          in: query
+          schema:
+            type: string
+            format: uuid
+          description: Filter by source ID
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum: [published_at, relevance, view_count]
+            default: published_at
+        - name: order
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+      responses:
+        '200':
+          description: List of articles
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArticleListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /v1/articles/{id}:
+    get:
+      summary: Get article by ID
+      operationId: getArticle
+      tags:
+        - Articles
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Article details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Article'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /v1/articles/search:
+    get:
+      summary: Search articles
+      operationId: searchArticles
+      tags:
+        - Articles
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 2
+          description: Search query
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [fulltext, semantic]
+            default: fulltext
+          description: Search type
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: severity
+          in: query
+          schema:
+            $ref: '#/components/schemas/Severity'
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArticleSearchResponse'
+        '400':
+          description: Invalid search query
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /v1/articles/feed:
+    get:
+      summary: Get personalized feed
+      operationId: getArticleFeed
+      tags:
+        - Articles
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: Personalized article feed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArticleListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /v1/articles/{id}/bookmark:
+    post:
+      summary: Bookmark article
+      operationId: bookmarkArticle
+      tags:
+        - Articles
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '201':
+          description: Article bookmarked
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Article bookmarked
+                  bookmarked_at:
+                    type: string
+                    format: date-time
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Already bookmarked
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      summary: Remove bookmark
+      operationId: removeBookmark
+      tags:
+        - Articles
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Bookmark removed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Bookmark removed
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /v1/articles/{id}/read:
+    post:
+      summary: Mark article as read
+      operationId: markArticleRead
+      tags:
+        - Articles
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reading_time_seconds:
+                  type: integer
+                  minimum: 0
+                  description: Optional actual reading time
+      responses:
+        '200':
+          description: Article marked as read
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Article marked as read
+                  read_at:
+                    type: string
+                    format: date-time
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /v1/users/me/bookmarks:
+    get:
+      summary: Get user bookmarks
+      operationId: getUserBookmarks
+      tags:
+        - Articles
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: User bookmarks
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArticleListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /v1/categories:
+    get:
+      summary: List categories
+      operationId: listCategories
+      tags:
+        - Categories
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of categories
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  categories:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Category'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /v1/categories/{slug}:
+    get:
+      summary: Get category by slug
+      operationId: getCategory
+      tags:
+        - Categories
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Category details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /v1/sources:
+    get:
+      summary: List sources
+      operationId: listSources
+      tags:
+        - Sources
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: active_only
+          in: query
+          schema:
+            type: boolean
+            default: true
+      responses:
+        '200':
+          description: List of sources
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sources:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Source'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /v1/sources/{id}:
+    get:
+      summary: Get source by ID
+      operationId: getSource
+      tags:
+        - Sources
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Source details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Source'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  responses:
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+  schemas:
+    Severity:
+      type: string
+      enum: [critical, high, medium, low, informational]
+
+    Category:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: Vulnerabilities
+        slug:
+          type: string
+          example: vulnerabilities
+        description:
+          type: string
+        color:
+          type: string
+          pattern: '^#[0-9A-Fa-f]{6}$'
+          example: '#EA580C'
+        icon:
+          type: string
+        article_count:
+          type: integer
+          description: Number of articles in category
+
+    Source:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: CISA
+        url:
+          type: string
+          format: uri
+          example: https://www.cisa.gov
+        description:
+          type: string
+        is_active:
+          type: boolean
+        trust_score:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+          example: 1.0
+        article_count:
+          type: integer
+          description: Number of articles from source
+
+    Article:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+          example: Critical VMware vCenter Vulnerability Exploited in Wild
+        slug:
+          type: string
+          example: critical-vmware-vcenter-vulnerability-exploited
+        content:
+          type: string
+          description: Full HTML content
+        summary:
+          type: string
+        category:
+          $ref: '#/components/schemas/Category'
+        source:
+          $ref: '#/components/schemas/Source'
+        source_url:
+          type: string
+          format: uri
+        severity:
+          $ref: '#/components/schemas/Severity'
+        tags:
+          type: array
+          items:
+            type: string
+          example: [vmware, vcenter, exploit]
+        cves:
+          type: array
+          items:
+            type: string
+            pattern: '^CVE-\d{4}-\d+$'
+          example: [CVE-2024-12345]
+        vendors:
+          type: array
+          items:
+            type: string
+          example: [VMware]
+        threat_type:
+          type: string
+          example: vulnerability
+        attack_vector:
+          type: string
+        impact_assessment:
+          type: string
+        recommended_actions:
+          type: array
+          items:
+            type: string
+        iocs:
+          type: array
+          items:
+            $ref: '#/components/schemas/IOC'
+        armor_relevance:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+        armor_cta:
+          $ref: '#/components/schemas/ArmorCTA'
+        reading_time_minutes:
+          type: integer
+          example: 4
+        view_count:
+          type: integer
+        is_bookmarked:
+          type: boolean
+          description: Whether current user has bookmarked
+        is_read:
+          type: boolean
+          description: Whether current user has read
+        published_at:
+          type: string
+          format: date-time
+        enriched_at:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+
+    IOC:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [ip, domain, hash, url]
+        value:
+          type: string
+        context:
+          type: string
+
+    ArmorCTA:
+      type: object
+      properties:
+        type:
+          type: string
+          example: vulnerability-management
+        title:
+          type: string
+          example: Protect Your Infrastructure
+        url:
+          type: string
+          format: uri
+          example: https://armor.com/vulnerability-management
+
+    ArticleListResponse:
+      type: object
+      properties:
+        articles:
+          type: array
+          items:
+            $ref: '#/components/schemas/ArticleSummary'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    ArticleSummary:
+      type: object
+      description: Article without full content
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        slug:
+          type: string
+        summary:
+          type: string
+        category:
+          $ref: '#/components/schemas/Category'
+        source_name:
+          type: string
+        severity:
+          $ref: '#/components/schemas/Severity'
+        tags:
+          type: array
+          items:
+            type: string
+        cves:
+          type: array
+          items:
+            type: string
+        armor_cta:
+          $ref: '#/components/schemas/ArmorCTA'
+        reading_time_minutes:
+          type: integer
+        is_bookmarked:
+          type: boolean
+        is_read:
+          type: boolean
+        published_at:
+          type: string
+          format: date-time
+
+    ArticleSearchResponse:
+      type: object
+      properties:
+        articles:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/ArticleSummary'
+              - type: object
+                properties:
+                  score:
+                    type: number
+                    format: float
+                    description: Search relevance score
+                  highlights:
+                    type: object
+                    properties:
+                      title:
+                        type: string
+                      summary:
+                        type: string
+                      content:
+                        type: string
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+        query:
+          type: string
+        search_type:
+          type: string
+          enum: [fulltext, semantic]
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+        limit:
+          type: integer
+        total_items:
+          type: integer
+        total_pages:
+          type: integer
+        has_next:
+          type: boolean
+        has_prev:
+          type: boolean
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: object
+          required:
+            - code
+            - message
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            details:
+              type: object
+            request_id:
+              type: string
+              format: uuid
