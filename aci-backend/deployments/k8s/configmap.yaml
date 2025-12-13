@@ -1,0 +1,55 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: aci-backend-config
+  namespace: aci-backend
+  labels:
+    app.kubernetes.io/name: aci-backend
+    app.kubernetes.io/component: configuration
+data:
+  # Server configuration
+  # Port on which the HTTP server listens
+  SERVER_PORT: "8080"
+
+  # Logging configuration
+  # Valid levels: debug, info, warn, error
+  LOG_LEVEL: "info"
+
+  # JWT token expiry durations
+  # Access token: Short-lived for API requests (15 minutes)
+  JWT_ACCESS_TOKEN_EXPIRY: "15m"
+  # Refresh token: Long-lived for token renewal (7 days)
+  JWT_REFRESH_TOKEN_EXPIRY: "168h"
+
+  # Database connection settings
+  # PostgreSQL service within the cluster
+  DATABASE_HOST: "postgres.aci-backend.svc.cluster.local"
+  DATABASE_PORT: "5432"
+  DATABASE_NAME: "aci"
+  # Maximum number of open connections to the database
+  DATABASE_MAX_CONNECTIONS: "25"
+  # Maximum number of idle connections in the pool
+  DATABASE_MAX_IDLE_CONNECTIONS: "5"
+  # Maximum lifetime of a connection (in minutes)
+  DATABASE_CONNECTION_MAX_LIFETIME: "30m"
+
+  # Redis cache configuration (optional)
+  # Redis service within the cluster for caching and session storage
+  REDIS_HOST: "redis.aci-backend.svc.cluster.local"
+  REDIS_PORT: "6379"
+  REDIS_DB: "0"
+
+  # Feature flags
+  # Enable request logging middleware
+  ENABLE_REQUEST_LOGGING: "true"
+  # Enable CORS for cross-origin requests
+  ENABLE_CORS: "true"
+  # Allowed CORS origins (comma-separated)
+  CORS_ALLOWED_ORIGINS: "http://localhost:3000,http://aci.local"
+
+  # Rate limiting
+  # Maximum requests per minute per IP
+  RATE_LIMIT_REQUESTS_PER_MINUTE: "60"
+
+  # Graceful shutdown timeout (in seconds)
+  SHUTDOWN_TIMEOUT: "30"

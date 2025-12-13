@@ -1,0 +1,199 @@
+version: '3.9'
+
+# Docker Compose file for local development
+# Runs ACI Backend with PostgreSQL and Redis dependencies
+
+services:
+  # PostgreSQL database with pgvector extension
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: aci-postgres
+    restart: unless-stopped
+
+    environment:
+      # Database credentials
+      POSTGRES_DB: aci
+      POSTGRES_USER: aci_user
+      POSTGRES_PASSWORD: aci_password_dev_only
+      # PostgreSQL configuration
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=en_US.UTF-8"
+      # Shared memory for PostgreSQL (increase for production)
+      POSTGRES_SHARED_BUFFERS: 256MB
+
+    ports:
+      # Expose PostgreSQL on host (for debugging with psql/pgAdmin)
+      # Using non-standard port to avoid conflicts with other postgres instances
+      - "5433:5432"
+
+    volumes:
+      # Persist database data
+      - postgres-data:/var/lib/postgresql/data
+      # Custom init scripts (create extensions, seed data)
+      - ./init-scripts:/docker-entrypoint-initdb.d
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aci_user -d aci"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+    networks:
+      - aci-network
+
+  # Redis cache (optional)
+  redis:
+    image: redis:7-alpine
+    container_name: aci-redis
+    restart: unless-stopped
+
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+
+    ports:
+      # Expose Redis on host (for debugging with redis-cli)
+      # Using non-standard port to avoid conflicts with other redis instances
+      - "6380:6379"
+
+    volumes:
+      # Persist Redis data
+      - redis-data:/data
+
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+    networks:
+      - aci-network
+
+  # ACI Backend API
+  aci-backend:
+    build:
+      context: ..
+      dockerfile: deployments/Dockerfile
+      args:
+        VERSION: dev
+        BUILD_TIME: ${BUILD_TIME:-unknown}
+        GIT_COMMIT: ${GIT_COMMIT:-unknown}
+
+    container_name: aci-backend
+    restart: unless-stopped
+
+    # Wait for dependencies to be healthy
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+    environment:
+      # Server configuration
+      SERVER_PORT: 8080
+      LOG_LEVEL: debug
+
+      # Database configuration (as URL)
+      DATABASE_URL: postgres://aci_user:aci_password_dev_only@postgres:5432/aci?sslmode=disable
+
+      # Redis configuration (as URL)
+      REDIS_URL: redis://redis:6379/0
+
+      # JWT configuration (paths inside container)
+      JWT_PRIVATE_KEY_PATH: /app/keys/jwt-private.pem
+      JWT_PUBLIC_KEY_PATH: /app/keys/jwt-public.pem
+      JWT_ACCESS_TOKEN_EXPIRY: 15m
+      JWT_REFRESH_TOKEN_EXPIRY: 168h
+
+      # n8n webhook
+      N8N_WEBHOOK_SECRET: ${N8N_WEBHOOK_SECRET:-dev_webhook_secret}
+
+      # Anthropic API
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-sk-ant-placeholder-for-dev}
+
+      # Feature flags
+      ENABLE_REQUEST_LOGGING: "true"
+      ENABLE_CORS: "true"
+      CORS_ALLOWED_ORIGINS: "http://localhost:3000,http://localhost:5173,http://localhost:8080"
+
+      # Development mode
+      ENVIRONMENT: development
+
+    ports:
+      # Expose API on host
+      - "8080:8080"
+
+    volumes:
+      # Mount source code for hot reload (if using air or similar)
+      # - ../../:/app
+      # Mount cache directory
+      - backend-cache:/app/cache
+      # Mount JWT keys for development
+      - ./keys:/app/keys:ro
+
+    healthcheck:
+      test: ["CMD", "/app/aci-backend", "health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+    networks:
+      - aci-network
+
+# Volumes for data persistence
+volumes:
+  postgres-data:
+    driver: local
+  redis-data:
+    driver: local
+  backend-cache:
+    driver: local
+
+# Network for service communication
+networks:
+  aci-network:
+    driver: bridge
+
+###############################################################################
+# Usage:
+###############################################################################
+#
+# 1. Start all services:
+#    docker-compose -f aci-backend/deployments/docker-compose.yml up -d
+#
+# 2. View logs:
+#    docker-compose -f aci-backend/deployments/docker-compose.yml logs -f
+#    docker-compose -f aci-backend/deployments/docker-compose.yml logs -f aci-backend
+#
+# 3. Stop all services:
+#    docker-compose -f aci-backend/deployments/docker-compose.yml down
+#
+# 4. Stop and remove volumes (⚠️ deletes data):
+#    docker-compose -f aci-backend/deployments/docker-compose.yml down -v
+#
+# 5. Rebuild services:
+#    docker-compose -f aci-backend/deployments/docker-compose.yml build
+#    docker-compose -f aci-backend/deployments/docker-compose.yml up -d --build
+#
+# 6. Execute commands in containers:
+#    docker-compose -f aci-backend/deployments/docker-compose.yml exec aci-backend sh
+#    docker-compose -f aci-backend/deployments/docker-compose.yml exec postgres psql -U aci_user -d aci
+#    docker-compose -f aci-backend/deployments/docker-compose.yml exec redis redis-cli
+#
+# 7. Scale services:
+#    docker-compose -f aci-backend/deployments/docker-compose.yml up -d --scale aci-backend=3
+#
+# 8. Check service health:
+#    docker-compose -f aci-backend/deployments/docker-compose.yml ps
+#
+# 9. Test API:
+#    curl http://localhost:8080/v1/health
+#
+# 10. Environment variables:
+#     Create .env file in deployments/ directory:
+#     ANTHROPIC_API_KEY=sk-ant-xxx
+#     N8N_WEBHOOK_SECRET=super_secret_key
+#     Then: docker-compose --env-file .env up -d
+#
+###############################################################################

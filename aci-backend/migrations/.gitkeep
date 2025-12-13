@@ -1,0 +1,3 @@
+# Database Migrations
+# SQL migration files managed by golang-migrate
+# Format: YYYYMMDDHHMMSS_description.up.sql / .down.sql

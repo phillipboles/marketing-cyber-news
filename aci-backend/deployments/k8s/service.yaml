@@ -1,0 +1,60 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: aci-backend
+  namespace: aci-backend
+  labels:
+    app.kubernetes.io/name: aci-backend
+    app.kubernetes.io/component: api
+    app.kubernetes.io/part-of: aci-platform
+  annotations:
+    # Service description for documentation
+    description: "ACI Backend API Service"
+spec:
+  # ClusterIP: Internal service, accessible only within the cluster
+  # Use LoadBalancer for cloud deployments
+  # Use NodePort for direct external access in local environments
+  type: ClusterIP
+
+  # Session affinity: Route requests from same client to same pod
+  # None (default): Load balance across all pods
+  # ClientIP: Stick to same pod based on client IP
+  sessionAffinity: None
+
+  selector:
+    app.kubernetes.io/name: aci-backend
+    app.kubernetes.io/component: api
+
+  ports:
+  - name: http
+    # External port exposed by the service
+    port: 80
+    # Target port on the pods (matches containerPort in deployment)
+    targetPort: http
+    # Protocol
+    protocol: TCP
+    # NodePort: Uncomment for NodePort service type
+    # nodePort: 30080
+
+---
+# Headless service for StatefulSet or direct pod access (optional)
+# Uncomment if you need to access pods directly by DNS
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: aci-backend-headless
+#   namespace: aci-backend
+#   labels:
+#     app.kubernetes.io/name: aci-backend
+#     app.kubernetes.io/component: api
+# spec:
+#   type: ClusterIP
+#   clusterIP: None
+#   selector:
+#     app.kubernetes.io/name: aci-backend
+#     app.kubernetes.io/component: api
+#   ports:
+#   - name: http
+#     port: 8080
+#     targetPort: http
+#     protocol: TCP

@@ -1,0 +1,103 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Namespace for all resources
+namespace: aci-backend
+
+# Common labels applied to all resources
+commonLabels:
+  app.kubernetes.io/managed-by: kustomize
+  app.kubernetes.io/part-of: aci-platform
+
+# Common annotations applied to all resources
+commonAnnotations:
+  deployment.kubernetes.io/revision: "1"
+
+# Resources to include in this kustomization
+resources:
+  - namespace.yaml
+  - configmap.yaml
+  - secret.yaml
+  - deployment.yaml
+  - service.yaml
+  - ingress.yaml
+  - hpa.yaml
+  - pdb.yaml
+
+# Images to customize
+images:
+  - name: aci-backend
+    newName: aci-backend
+    newTag: latest
+
+# ConfigMap generator (alternative to configmap.yaml)
+# Uncomment to generate ConfigMap from files or literals
+# configMapGenerator:
+#   - name: aci-backend-config
+#     literals:
+#       - SERVER_PORT=8080
+#       - LOG_LEVEL=info
+
+# Secret generator (alternative to secret.yaml)
+# Uncomment to generate Secret from files or literals
+# secretGenerator:
+#   - name: aci-backend-secrets
+#     files:
+#       - DATABASE_PASSWORD=secrets/db-password.txt
+#     literals:
+#       - N8N_WEBHOOK_SECRET=changeme
+
+# Patches for customization
+# patches:
+#   - path: deployment-patch.yaml
+#     target:
+#       kind: Deployment
+#       name: aci-backend
+
+# Replacements for cross-resource field references
+# replacements:
+#   - source:
+#       kind: ConfigMap
+#       name: aci-backend-config
+#       fieldPath: data.SERVER_PORT
+#     targets:
+#       - select:
+#           kind: Service
+#           name: aci-backend
+#         fieldPaths:
+#           - spec.ports.[name=http].port
+
+---
+# Usage:
+#
+# 1. Build and preview manifests:
+#    kubectl kustomize .
+#
+# 2. Apply to cluster:
+#    kubectl apply -k .
+#
+# 3. Delete from cluster:
+#    kubectl delete -k .
+#
+# 4. Create environment overlays:
+#    overlays/
+#    ├── dev/
+#    │   ├── kustomization.yaml
+#    │   └── patch-replicas.yaml
+#    ├── staging/
+#    │   ├── kustomization.yaml
+#    │   └── patch-replicas.yaml
+#    └── prod/
+#        ├── kustomization.yaml
+#        └── patch-replicas.yaml
+#
+# Example overlay (overlays/dev/kustomization.yaml):
+# apiVersion: kustomize.config.k8s.io/v1beta1
+# kind: Kustomization
+# bases:
+#   - ../../base
+# patchesStrategicMerge:
+#   - patch-replicas.yaml
+# images:
+#   - name: aci-backend
+#     newTag: dev-abc123

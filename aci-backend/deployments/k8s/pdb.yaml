@@ -1,0 +1,54 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: aci-backend
+  namespace: aci-backend
+  labels:
+    app.kubernetes.io/name: aci-backend
+    app.kubernetes.io/component: reliability
+spec:
+  # Minimum number of pods that must remain available during voluntary disruptions
+  # Voluntary disruptions include:
+  # - Node drains for maintenance
+  # - Cluster upgrades
+  # - Application updates
+  # - Manual pod deletions
+  #
+  # This ensures at least 1 pod is always running for high availability
+  minAvailable: 1
+
+  # Alternative: Use maxUnavailable instead of minAvailable
+  # maxUnavailable: 1
+  # This would allow at most 1 pod to be unavailable at a time
+
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: aci-backend
+      app.kubernetes.io/component: api
+
+---
+# Why PodDisruptionBudget matters:
+#
+# 1. Prevents complete service outages during:
+#    - Kubernetes cluster upgrades
+#    - Node maintenance (kubectl drain)
+#    - Application deployments
+#
+# 2. Works with RollingUpdate strategy:
+#    - Deployment.spec.strategy.rollingUpdate.maxUnavailable
+#    - PDB.spec.minAvailable
+#    - Together they ensure smooth updates
+#
+# 3. Example scenarios:
+#    - With 2 replicas and minAvailable: 1
+#      * During node drain: 1 pod stays running while 1 is evicted
+#      * New pod starts on different node
+#      * Once new pod is ready, second old pod can be evicted
+#
+# 4. Monitoring:
+#    kubectl get pdb -n aci-backend
+#    kubectl describe pdb aci-backend -n aci-backend
+#
+# 5. Testing:
+#    kubectl drain <node-name> --ignore-daemonsets --delete-emptydir-data
+#    # PDB will prevent draining if it would violate minAvailable

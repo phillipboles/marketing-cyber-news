@@ -1,0 +1,90 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: aci-backend
+  namespace: aci-backend
+  labels:
+    app.kubernetes.io/name: aci-backend
+    app.kubernetes.io/component: ingress
+  annotations:
+    # Ingress class: nginx, traefik, etc.
+    # For minikube: nginx (install with: minikube addons enable ingress)
+    # For k3s: traefik (built-in)
+    kubernetes.io/ingress.class: "nginx"
+
+    # Request size limits
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+
+    # Timeouts for long-running requests
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
+
+    # CORS headers (if not handled by application)
+    # nginx.ingress.kubernetes.io/enable-cors: "true"
+    # nginx.ingress.kubernetes.io/cors-allow-origin: "http://localhost:3000"
+
+    # Rate limiting (requests per second per IP)
+    # nginx.ingress.kubernetes.io/limit-rps: "10"
+
+    # SSL redirect (uncomment when TLS is configured)
+    # nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    # nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+
+    # cert-manager annotation for automatic TLS certificate (uncomment when cert-manager is installed)
+    # cert-manager.io/cluster-issuer: "letsencrypt-prod"
+spec:
+  # TLS configuration (uncomment when ready to enable HTTPS)
+  # tls:
+  # - hosts:
+  #   - aci.local
+  #   # Secret will be created automatically by cert-manager
+  #   # Or create manually with: kubectl create secret tls aci-backend-tls --cert=tls.crt --key=tls.key -n aci-backend
+  #   secretName: aci-backend-tls
+
+  rules:
+  - host: aci.local
+    http:
+      paths:
+      # API routes
+      - path: /v1
+        pathType: Prefix
+        backend:
+          service:
+            name: aci-backend
+            port:
+              name: http
+
+      # Health check routes (useful for external monitoring)
+      - path: /health
+        pathType: Prefix
+        backend:
+          service:
+            name: aci-backend
+            port:
+              name: http
+
+      # Catch-all for root path
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: aci-backend
+            port:
+              name: http
+
+---
+# For local development: Add aci.local to /etc/hosts
+# Run: echo "$(minikube ip) aci.local" | sudo tee -a /etc/hosts
+# Or for k3s/kind: echo "127.0.0.1 aci.local" | sudo tee -a /etc/hosts
+#
+# Test with: curl http://aci.local/v1/health
+#
+# For TLS testing with self-signed cert:
+# 1. Generate certificate:
+#    openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+#      -keyout tls.key -out tls.crt -subj "/CN=aci.local"
+# 2. Create secret:
+#    kubectl create secret tls aci-backend-tls --cert=tls.crt --key=tls.key -n aci-backend
+# 3. Uncomment tls section above
+# 4. Test with: curl -k https://aci.local/v1/health

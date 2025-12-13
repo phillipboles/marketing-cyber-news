@@ -1,0 +1,116 @@
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: aci-backend
+  namespace: aci-backend
+  labels:
+    app.kubernetes.io/name: aci-backend
+    app.kubernetes.io/component: autoscaling
+spec:
+  # Reference to the Deployment to scale
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: aci-backend
+
+  # Minimum number of replicas
+  # Ensures high availability even under low load
+  minReplicas: 2
+
+  # Maximum number of replicas
+  # Prevents runaway scaling and resource exhaustion
+  maxReplicas: 10
+
+  # Scaling behavior configuration
+  behavior:
+    scaleDown:
+      # Prevent rapid scale-down oscillations
+      stabilizationWindowSeconds: 300
+      policies:
+      # Allow removing max 1 pod every 60 seconds
+      - type: Pods
+        value: 1
+        periodSeconds: 60
+      # Allow reducing by max 10% every 60 seconds
+      - type: Percent
+        value: 10
+        periodSeconds: 60
+      # Use the more conservative policy
+      selectPolicy: Min
+
+    scaleUp:
+      # Stabilization window for scale-up (0 = immediate scaling)
+      stabilizationWindowSeconds: 0
+      policies:
+      # Allow adding max 2 pods every 30 seconds
+      - type: Pods
+        value: 2
+        periodSeconds: 30
+      # Allow increasing by max 50% every 30 seconds
+      - type: Percent
+        value: 50
+        periodSeconds: 30
+      # Use the more aggressive policy for faster response to load
+      selectPolicy: Max
+
+  # Metrics to base scaling decisions on
+  metrics:
+  # CPU utilization metric
+  # Scale up when average CPU across all pods exceeds 70%
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        # Target 70% CPU utilization
+        # Scales up before hitting resource limits
+        averageUtilization: 70
+
+  # Memory utilization metric
+  # Scale up when average memory across all pods exceeds 80%
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        # Target 80% memory utilization
+        # Higher threshold since memory is less spiky than CPU
+        averageUtilization: 80
+
+  # Custom metrics (uncomment when metrics-server and custom metrics are available)
+  # Request rate metric (requires Prometheus adapter or similar)
+  # - type: Pods
+  #   pods:
+  #     metric:
+  #       name: http_requests_per_second
+  #     target:
+  #       type: AverageValue
+  #       # Scale when average RPS per pod exceeds 100
+  #       averageValue: "100"
+
+  # Response time metric (requires custom metrics)
+  # - type: Pods
+  #   pods:
+  #     metric:
+  #       name: http_request_duration_seconds
+  #     target:
+  #       type: AverageValue
+  #       # Scale when average response time exceeds 500ms
+  #       averageValue: "500m"
+
+---
+# Prerequisites for HPA:
+# 1. Metrics Server must be installed
+#    - Minikube: minikube addons enable metrics-server
+#    - k3s: Usually pre-installed
+#    - kind: kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+#
+# 2. Resource requests must be defined in Deployment (already done)
+#
+# 3. Verify metrics server: kubectl top nodes
+#
+# 4. Monitor HPA: kubectl get hpa -n aci-backend -w
+#
+# 5. Test scaling:
+#    - Generate load: kubectl run -it --rm load-generator --image=busybox --restart=Never -- /bin/sh -c "while sleep 0.01; do wget -q -O- http://aci-backend.aci-backend/v1/health; done"
+#    - Watch scaling: kubectl get hpa -n aci-backend -w

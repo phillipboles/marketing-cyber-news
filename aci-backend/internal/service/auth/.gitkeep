@@ -1,0 +1,2 @@
+# Auth Service
+# Handles authentication, JWT token generation/validation, password hashing
