@@ -113,3 +113,37 @@
 - **SC-002**: [Measurable metric, e.g., "System handles 1000 concurrent users without degradation"]
 - **SC-003**: [User satisfaction metric, e.g., "90% of users successfully complete primary task on first attempt"]
 - **SC-004**: [Business metric, e.g., "Reduce support tickets related to [X] by 50%"]
+
+## PM Acceptance Criteria *(mandatory)*
+
+*Per Constitution Principle XVI - Product Manager Ownership*
+
+<!--
+  ACTION REQUIRED: Define PM acceptance criteria for each gate.
+  These criteria MUST be satisfied for PM sign-off at each review gate.
+-->
+
+### PM-1 Gate: Pre-Implementation Approval
+
+- [ ] All user stories have clear acceptance scenarios
+- [ ] Priorities (P1, P2, P3) are assigned and justified
+- [ ] Edge cases are identified and documented
+- [ ] Success metrics are measurable and achievable
+- [ ] Out-of-scope items are explicitly declared
+- [ ] Gap analysis from PM review has been addressed (Critical items resolved)
+
+### PM-2 Gate: Mid-Implementation Alignment
+
+- [ ] Feature implementation aligns with original scope
+- [ ] No scope creep has occurred (or changes are documented/approved)
+- [ ] P1 user stories are functional and testable
+- [ ] Risks identified during implementation are tracked
+
+### PM-3 Gate: Pre-Release Verification
+
+- [ ] All acceptance scenarios pass
+- [ ] User journeys validated end-to-end
+- [ ] Documentation is complete and accurate
+- [ ] Performance targets met
+- [ ] Security requirements validated
+- [ ] Product verification checklist completed

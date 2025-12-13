@@ -58,7 +58,7 @@ description: "Task list template for feature implementation"
 
 **Purpose**: Core infrastructure that MUST be complete before ANY user story can be implemented
 
-**⚠️ CRITICAL**: No user story work can begin until this phase is complete
+**⚠️ CRITICAL**: No user story work can begin until this phase is complete AND PM-1 gate passes
 
 Examples of foundational tasks (adjust based on your project):
 
@@ -69,7 +69,17 @@ Examples of foundational tasks (adjust based on your project):
 - [ ] T008 Configure error handling and logging infrastructure
 - [ ] T009 Setup environment configuration management
 
-**Checkpoint**: Foundation ready - user story implementation can now begin in parallel
+### PM-1 Gate (Required before Phase 3)
+
+*Per Constitution Principle XVI - Product Manager Ownership*
+
+- [ ] T00X PM-1: Verify spec approval with prioritized backlog
+- [ ] T00X PM-1: Confirm success metrics defined and measurable
+- [ ] T00X PM-1: Verify gap analysis completed (Critical items addressed)
+- [ ] T00X PM-1: Ensure pm-review.md exists in specs/[###-feature]/
+- [ ] T00X PM-1: Obtain PM sign-off for user story implementation
+
+**Checkpoint**: Foundation ready AND PM-1 passed - user story implementation can now begin in parallel
 
 ---
 
@@ -146,6 +156,20 @@ Examples of foundational tasks (adjust based on your project):
 
 ---
 
+## Phase N-1: PM-2 Gate Review
+
+**Purpose**: Mid-implementation PM alignment check (Constitution Principle XVI)
+
+**PM-2 Gate Deliverables**:
+- [ ] TXXX Feature completeness check - verify P1 stories functional
+- [ ] TXXX Scope validation - confirm no scope creep
+- [ ] TXXX Risk assessment - document implementation risks
+- [ ] TXXX PM-2 sign-off obtained (document in pm-review.md)
+
+**Checkpoint**: PM-2 gate passed - proceed to remaining stories and polish
+
+---
+
 ## Phase N: Polish & Cross-Cutting Concerns
 
 **Purpose**: Improvements that affect multiple user stories
@@ -156,6 +180,23 @@ Examples of foundational tasks (adjust based on your project):
 - [ ] TXXX [P] Additional unit tests (if requested) in tests/unit/
 - [ ] TXXX Security hardening
 - [ ] TXXX Run quickstart.md validation
+
+---
+
+## Phase N+1: PM-3 Gate & Release Verification
+
+**Purpose**: Final PM verification before deployment (Constitution Principle XVI)
+
+**PM-3 Gate Deliverables**:
+- [ ] TXXX UAT sign-off - all acceptance scenarios pass
+- [ ] TXXX User journey validation - end-to-end testing complete
+- [ ] TXXX Documentation approval - README, API docs, guides complete
+- [ ] TXXX Performance verification - targets met
+- [ ] TXXX Security validation - OWASP compliance verified
+- [ ] TXXX Product verification checklist completed (60+ items)
+- [ ] TXXX PM-3 sign-off obtained (document in pm-review.md)
+
+**Checkpoint**: PM-3 gate passed - ready for production deployment
 
 ---
 

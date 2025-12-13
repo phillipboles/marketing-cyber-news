@@ -33,6 +33,33 @@
 
 [Gates determined based on constitution file]
 
+## PM Review Gates
+
+*Per Constitution Principle XVI - Product Manager Ownership*
+
+| Gate | Phase | Status | Reviewer | Date |
+|------|-------|--------|----------|------|
+| **PM-1** | Pre-Implementation | [ ] Pending | | |
+| **PM-2** | Mid-Implementation | [ ] Pending | | |
+| **PM-3** | Pre-Release | [ ] Pending | | |
+
+**PM-1 Deliverables** (Required before Phase 2):
+- [ ] Approved spec with prioritized backlog
+- [ ] Success metrics defined
+- [ ] Gap analysis completed (Critical items addressed)
+- [ ] pm-review.md created in `specs/[###-feature]/`
+
+**PM-2 Deliverables** (Required at Phase 3 midpoint):
+- [ ] Feature completeness check
+- [ ] Scope validation (no creep)
+- [ ] Risk assessment updated
+
+**PM-3 Deliverables** (Required before deployment):
+- [ ] UAT sign-off
+- [ ] Launch readiness confirmed
+- [ ] Documentation approval
+- [ ] Product verification checklist completed (60+ items)
+
 ## Project Structure
 
 ### Documentation (this feature)
