@@ -235,6 +235,13 @@ As an admin, I want to review and moderate content so that I can ensure quality 
 - [ ] Security requirements validated
 - [ ] Product verification checklist completed
 
+## Clarifications
+
+### Session 2024-12-13
+
+- Q: How should JWT tokens be stored on the client? → A: HttpOnly cookies (backend sets cookie)
+- Q: How should frontend errors be tracked? → A: OpenTelemetry with SigNoz backend; console logging for development phase
+
 ## Out of Scope
 
 - Email digest notifications (future roadmap)
@@ -248,10 +255,11 @@ As an admin, I want to review and moderate content so that I can ensure quality 
 
 - Backend API endpoints are available and functional (from 001-aci-backend)
 - WebSocket server is operational for real-time updates
-- Authentication system uses JWT tokens as per backend spec
+- Authentication system uses JWT tokens stored in HttpOnly cookies (set by backend for XSS protection)
 - UI libraries (shadcn/ui, Reviz, Ant Design) will be installed and configured
 - Dark theme is the primary/default theme
 - Standard web performance expectations apply (3G+ connections)
+- Observability via OpenTelemetry with SigNoz backend (console logging sufficient for development)
 
 ## Dependencies
 
