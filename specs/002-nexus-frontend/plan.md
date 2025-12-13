@@ -5,37 +5,40 @@
 
 ## Summary
 
-Implement the NEXUS by Armor frontend dashboard - a cybersecurity threat intelligence interface with real-time updates, data visualizations, and threat management capabilities. The frontend will be built as a React SPA using Vite, with shadcn/ui for components, Reviz for charts, and Ant Design as fallback for complex components. It integrates with the existing Go backend API (001-aci-backend) via REST and WebSocket.
+NEXUS by Armor is the frontend dashboard for the Armor Cyber Intelligence (ACI) platform. This implementation delivers a React 19 + Vite 7 + TypeScript 5.9 cybersecurity threat intelligence dashboard with real-time WebSocket updates, data visualizations using Reviz, and shadcn/ui components. The dashboard enables security analysts to monitor threats, manage alerts, and view analytics with a dark theme cyber aesthetic.
 
 ## Technical Context
 
-**Language/Version**: TypeScript 5.9, React 19.2
-**Primary Dependencies**: Vite 7.2, shadcn/ui, Reviz, Ant Design, TanStack Query, react-router-dom 7.x
-**Storage**: N/A (frontend only - backend handles persistence)
-**Testing**: Vitest + React Testing Library + Playwright (E2E)
-**Target Platform**: Web browsers (Chrome, Firefox, Safari, Edge - latest 2 versions)
-**Project Type**: Web application (frontend only, backend exists in 001-aci-backend)
-**Performance Goals**: Dashboard load < 3s, interactions < 500ms, 60fps animations
-**Constraints**: < 500KB initial bundle, WebSocket reconnection < 5s
-**Scale/Scope**: ~15 pages, ~50 components, 500 concurrent users
+**Language/Version**: TypeScript 5.9 with React 19.2
+**Primary Dependencies**: React 19.2, Vite 7.2, shadcn/ui (Radix UI + Tailwind), Reviz, TanStack Query v5, react-router-dom v7
+**Storage**: N/A (frontend-only, backend manages persistence)
+**Testing**: Vitest + React Testing Library (unit), Playwright (E2E)
+**Target Platform**: Modern browsers (Chrome 90+, Firefox 90+, Safari 15+, Edge 90+)
+**Project Type**: Web application (frontend-only, consumes aci-backend API)
+**Performance Goals**: < 3s initial load, < 500ms interactions, 60fps animations
+**Constraints**: < 200ms API response handling, < 100KB per route bundle
+**Scale/Scope**: 500 concurrent users, 8 pages, 20+ components
 
 ## Constitution Check
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-| Principle | Status | Evidence |
-|-----------|--------|----------|
-| II. Security First | PASS | HttpOnly cookies for JWT, no client-side token storage |
-| VIII. Test-First Development | PENDING | Tests planned in Phase 2 |
-| IX. Clean Code Standards | PENDING | Will enforce via ESLint rules |
-| X. Observable Systems | PASS | OpenTelemetry + SigNoz (console for dev) |
-| XI. Parallel-First Orchestration | PASS | Phases/Waves structure defined |
-| XII. User Experience Excellence | PASS | Dark theme, responsive, WCAG compliant |
-| XIII. API-First Design | PASS | Backend contracts exist in 001-aci-backend |
-| XIV. Demonstrable Verification | PENDING | Verification in Phase 3 |
-| XVI. PM Ownership | PENDING | PM gates defined, awaiting reviews |
-
-**Gate Result**: PASS - Proceed to Phase 0
+| Principle | Status | Notes |
+|-----------|--------|-------|
+| I. License Compliance | PASS | Apache 2.0 compatible libraries only |
+| II. Security First | PASS | HttpOnly cookies, no token in localStorage |
+| III. Integration Integrity | PASS | API-only communication with backend |
+| V. Validation Gates | PASS | Vitest + Playwright testing |
+| VIII. Test-First Development | PASS | TDD with 4-case coverage |
+| IX. Clean Code Standards | PASS | TypeScript strict mode, ESLint |
+| X. Observable Systems | PASS | OpenTelemetry + SigNoz |
+| XI. Parallel-First Orchestration | PASS | Phase/wave structure defined |
+| XII. User Experience Excellence | PASS | Dark theme, accessibility, responsive |
+| XIII. API-First Design | PASS | Contracts defined in /contracts |
+| XIV. Demonstrable Verification | PASS | E2E tests for critical paths |
+| XV. Submodule-Centric Development | PASS | Code in aci-frontend/ |
+| XVI. Product Manager Ownership | PASS | PM gates defined |
+| XVII. Post-Wave Review | PASS | 6-agent review after each wave |
 
 ## PM Review Gates
 
@@ -46,6 +49,27 @@ Implement the NEXUS by Armor frontend dashboard - a cybersecurity threat intelli
 | **PM-1** | Pre-Implementation | [ ] Pending | | |
 | **PM-2** | Mid-Implementation | [ ] Pending | | |
 | **PM-3** | Pre-Release | [ ] Pending | | |
+
+## Post-Wave Review (MANDATORY)
+
+*Per Constitution Principle XVII - Post-Wave Review & Quality Assurance (NON-NEGOTIABLE)*
+
+**After EVERY wave completion, ALL of the following agents MUST review:**
+
+| Reviewer | Agent | Focus Area | Required |
+|----------|-------|------------|----------|
+| Product Manager | `product-manager-agent` | Business alignment, user value, scope compliance | YES |
+| UI Designer | `ui-ux-designer` | Visual design, layout, component consistency | YES |
+| UX Designer | `ux-designer` | Usability, user flows, accessibility | YES |
+| Visualization | `reviz-visualization` | Charts, graphs, data visualization quality | YES |
+| Code Reviewer | `code-reviewer` | Code quality, patterns, maintainability | YES |
+| Security Reviewer | `security-reviewer` | Security vulnerabilities, OWASP compliance | YES |
+
+**Requirements:**
+- All 6 reviewers must complete review before wave is marked complete
+- All task ratings must be ≥ 5 for wave to pass
+- Checklist sign-offs required per spec requirements
+- Wave summary report created in `specs/002-nexus-frontend/wave-reports/wave-N-report.md`
 
 **PM-1 Deliverables** (Required before Phase 2):
 - [ ] Approved spec with prioritized backlog
@@ -70,77 +94,135 @@ Implement the NEXUS by Armor frontend dashboard - a cybersecurity threat intelli
 
 ```text
 specs/002-nexus-frontend/
+├── spec.md              # Feature specification
 ├── plan.md              # This file
-├── research.md          # Phase 0 output
-├── data-model.md        # Phase 1 output
-├── quickstart.md        # Phase 1 output
-├── contracts/           # Phase 1 output (frontend contracts)
-└── tasks.md             # Phase 2 output (/speckit.tasks command)
+├── research.md          # Technology decisions
+├── data-model.md        # TypeScript type definitions
+├── quickstart.md        # Developer onboarding guide
+├── contracts/           # API contracts
+│   ├── frontend-api-client.md
+│   └── websocket-protocol.md
+├── checklists/          # Review checklists
+│   ├── ux.md
+│   ├── ux-api-auth-websockets.md
+│   └── pm-ux-verification.md
+├── wave-reports/        # Post-wave review summaries
+└── tasks.md             # Task breakdown (generated by /speckit.tasks)
 ```
 
-### Source Code (repository root)
+### Source Code
 
 ```text
 aci-frontend/
 ├── src/
-│   ├── components/          # Reusable UI components
-│   │   ├── ui/              # shadcn/ui base components
+│   ├── components/
+│   │   ├── ui/              # shadcn/ui components
 │   │   ├── charts/          # Reviz chart components
-│   │   ├── layout/          # Layout components (Header, Sidebar)
+│   │   ├── layout/          # Header, Sidebar, Footer
 │   │   └── threat/          # Threat-specific components
-│   ├── pages/               # Route pages
-│   │   ├── Dashboard/
-│   │   ├── Threats/
-│   │   ├── Alerts/
-│   │   ├── Bookmarks/
-│   │   ├── Analytics/
-│   │   ├── Admin/
-│   │   └── Settings/
-│   ├── services/            # API and WebSocket services
+│   ├── pages/               # Route page components
+│   ├── services/            # API and WebSocket clients
 │   │   ├── api/             # REST API client
 │   │   └── websocket/       # WebSocket client
 │   ├── hooks/               # Custom React hooks
-│   ├── stores/              # State management (React Context)
-│   ├── types/               # TypeScript type definitions
-│   ├── utils/               # Utility functions
-│   └── styles/              # Global styles and theme
+│   ├── stores/              # React Context providers
+│   ├── types/               # TypeScript definitions
+│   ├── utils/               # Helper functions
+│   └── mocks/               # MSW mock handlers
 ├── tests/
-│   ├── unit/                # Vitest unit tests
-│   ├── integration/         # Component integration tests
+│   ├── unit/                # Component unit tests
+│   ├── integration/         # User flow tests
 │   └── e2e/                 # Playwright E2E tests
 ├── public/                  # Static assets
-└── vite.config.ts
+└── package.json
 ```
 
-**Structure Decision**: Frontend-only application integrating with existing Go backend (001-aci-backend). The frontend follows a feature-based organization with shared components in `components/ui/` and domain-specific components in `components/threat/`.
+**Structure Decision**: Standalone React + Vite frontend application. No monorepo needed - single frontend consuming aci-backend REST API and WebSocket.
 
-## Complexity Tracking
+## Implementation Phases
 
-No constitution violations requiring justification.
+### Phase 1: Project Setup & Infrastructure
 
-## Phase Overview
+**Goal**: Bootstrapped React project with core dependencies and tooling
 
-### Phase 1: Setup & Foundation
-- Wave 1.1: [P] Project configuration, [P] shadcn/ui setup, [P] Reviz setup
-- Wave 1.2: [P] Theme configuration, [P] Router setup, [P] Layout components
+- Vite 7 + React 19 + TypeScript 5.9 project initialization
+- Tailwind CSS configuration with dark theme
+- shadcn/ui installation and component setup
+- ESLint + Prettier configuration
+- Vitest + React Testing Library setup
+- Basic project structure creation
 
-### Phase 2: Core Features (P1)
-- Wave 2.1: [P] API client, [P] WebSocket client, [P] Auth context
-- Wave 2.2: [P] Dashboard page, [P] Threat list page
-- Wave 2.3: [P] Threat detail page, [P] Filter components
+### Phase 2: Core Foundation
 
-### Phase 3: Secondary Features (P2)
-- Wave 3.1: [P] Bookmarks page, [P] Alerts page
-- Wave 3.2: [P] Real-time notifications, [P] Activity feed
+**Goal**: Authentication, routing, and base layout ready
 
-### Phase 4: Tertiary Features (P3)
-- Wave 4.1: [P] Analytics page, [P] Admin review queue
-- Wave 4.2: [P] Settings page, [P] User preferences
+- React Router v7 with protected routes
+- Auth context with HttpOnly cookie handling
+- Base layout (Header, Sidebar, Footer)
+- Error boundary implementation
+- Loading states and skeleton components
+- TanStack Query client configuration
 
-### Phase 5: Polish & Integration
-- Wave 5.1: [P] Error boundaries, [P] Loading states
-- Wave 5.2: [P] E2E tests, [P] Performance optimization
-- Wave 5.3: Documentation, deployment verification
+### Phase 3: User Story Implementation (P1)
+
+**Goal**: Critical P1 user stories functional
+
+- **US1**: Dashboard with metric cards, severity chart, timeline, activity feed
+- **US2**: Threat list with filters, search, pagination
+- **US3**: Threat detail view with CVEs, bookmarking
+
+### Phase 4: User Story Implementation (P2)
+
+**Goal**: P2 user stories functional
+
+- **US4**: Real-time notifications via WebSocket
+- **US5**: Bookmark management page
+- **US6**: Alert configuration and management
+
+### Phase 5: User Story Implementation (P3) & Polish
+
+**Goal**: P3 stories and production readiness
+
+- **US7**: Analytics page with trend charts
+- **US8**: Admin content review queue
+- Performance optimization
+- Accessibility audit and fixes
+- E2E test coverage
+- Documentation finalization
+
+## Key Dependencies
+
+| Dependency | Version | Purpose |
+|------------|---------|---------|
+| react | 19.2 | UI framework |
+| react-dom | 19.2 | DOM rendering |
+| vite | 7.2 | Build tool |
+| typescript | 5.9 | Type safety |
+| tailwindcss | 4.0 | Styling |
+| @tanstack/react-query | 5.x | Server state |
+| react-router-dom | 7.x | Routing |
+| reviz | latest | Charts |
+| @radix-ui/* | latest | Accessible primitives |
+| vitest | latest | Unit testing |
+| @playwright/test | latest | E2E testing |
+| @opentelemetry/api | latest | Observability |
+
+## Risk Mitigation
+
+| Risk | Probability | Impact | Mitigation |
+|------|-------------|--------|------------|
+| Backend API delays | Medium | High | MSW mocking for development |
+| WebSocket reliability | Medium | Medium | Robust reconnection with UI feedback |
+| Bundle size growth | Low | Medium | Size budget alerts in CI |
+| Browser compatibility | Low | Low | Playwright cross-browser tests |
+
+## Generated Artifacts
+
+- [research.md](./research.md) - Technology decisions
+- [data-model.md](./data-model.md) - TypeScript type definitions
+- [quickstart.md](./quickstart.md) - Developer onboarding
+- [contracts/frontend-api-client.md](./contracts/frontend-api-client.md) - REST API contract
+- [contracts/websocket-protocol.md](./contracts/websocket-protocol.md) - WebSocket protocol
 
 ## Next Steps
 
