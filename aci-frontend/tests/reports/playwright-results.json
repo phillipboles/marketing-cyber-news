@@ -10,9 +10,7 @@
     "grep": {},
     "grepInvert": null,
     "maxFailures": 0,
-    "metadata": {
-      "actualWorkers": 1
-    },
+    "metadata": {},
     "preserveOutput": "always",
     "reporter": [
       [
@@ -42,9 +40,7 @@
         "outputDir": "/Users/phillipboles/Development/n8n-cyber-news/aci-frontend/tests/artifacts",
         "repeatEach": 1,
         "retries": 0,
-        "metadata": {
-          "actualWorkers": 1
-        },
+        "metadata": {},
         "id": "chromium",
         "name": "chromium",
         "testDir": "/Users/phillipboles/Development/n8n-cyber-news/aci-frontend/tests/e2e",
@@ -63,59 +59,17 @@
     "workers": 1,
     "webServer": null
   },
-  "suites": [
+  "suites": [],
+  "errors": [
     {
-      "title": "capture-detail.spec.ts",
-      "file": "capture-detail.spec.ts",
-      "column": 0,
-      "line": 0,
-      "specs": [
-        {
-          "title": "capture threat detail with enrichment",
-          "ok": true,
-          "tags": [],
-          "tests": [
-            {
-              "timeout": 60000,
-              "annotations": [],
-              "expectedStatus": "passed",
-              "projectId": "chromium",
-              "projectName": "chromium",
-              "results": [
-                {
-                  "workerIndex": 0,
-                  "parallelIndex": 0,
-                  "status": "passed",
-                  "duration": 7553,
-                  "errors": [],
-                  "stdout": [
-                    {
-                      "text": "Enrichment detail screenshot saved\n"
-                    }
-                  ],
-                  "stderr": [],
-                  "retry": 0,
-                  "startTime": "2025-12-16T23:12:00.062Z",
-                  "annotations": [],
-                  "attachments": []
-                }
-              ],
-              "status": "expected"
-            }
-          ],
-          "id": "271ee0c9f7d1bb2799dd-64f6fb2b01d419a8c60e",
-          "file": "capture-detail.spec.ts",
-          "line": 2,
-          "column": 1
-        }
-      ]
+      "message": "Error: No tests found.\nMake sure that arguments are regular expressions matching test files.\nYou may need to escape symbols like \"$\" or \"*\" and quote the arguments.",
+      "stack": "Error: No tests found.\nMake sure that arguments are regular expressions matching test files.\nYou may need to escape symbols like \"$\" or \"*\" and quote the arguments."
     }
   ],
-  "errors": [],
   "stats": {
-    "startTime": "2025-12-16T23:11:59.593Z",
-    "duration": 8257.012,
-    "expected": 1,
+    "startTime": "2025-12-17T04:47:03.156Z",
+    "duration": 18.045999999999992,
+    "expected": 0,
     "skipped": 0,
     "unexpected": 0,
     "flaky": 0

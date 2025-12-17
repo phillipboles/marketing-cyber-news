@@ -1,4 +1,4 @@
-# n8n Cyber News
+# Armor Cyber News
 
 An automated cybersecurity news aggregation platform that collects, enriches, and delivers critical security information from trusted sources like CISA using a modern full-stack architecture.
 

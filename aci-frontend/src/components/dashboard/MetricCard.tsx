@@ -188,6 +188,7 @@ export function MetricCard({
         {trend && (
           <div
             data-testid="trend-indicator"
+            data-direction={trend.direction}
             className="flex items-center"
             style={{
               fontSize: typography.fontSize.sm,
