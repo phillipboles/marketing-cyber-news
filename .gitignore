@@ -47,6 +47,8 @@ go.work
 
 # Debug files
 aci-backend/__debug_bin*
+debug-*.js
+aci-backend/test-*.js
 
 # Air live reload
 aci-backend/tmp/
@@ -129,3 +131,17 @@ data/
 *.tmp
 *.temp
 .env.backup
+
+# ===================
+# Transient Documentation
+# ===================
+*_VERIFICATION*.md
+*_IMPLEMENTATION*.md
+*_SUMMARY.md
+*VERIFICATION*.md
+*IMPLEMENTATION*.md
+
+# ===================
+# Development Artifacts
+# ===================
+**/HANDOFF*.md
