@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import type { ReactElement } from 'react';
 import type { Article } from '../types';
 import { userService } from '../services/userService';
 import { SEVERITY_COLORS } from '../config/severity-colors';
@@ -13,7 +14,7 @@ interface HistoryProps {
   onArticleClick: (article: Article) => void;
 }
 
-export function History({ onArticleClick }: HistoryProps): JSX.Element {
+export function History({ onArticleClick }: HistoryProps): ReactElement {
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

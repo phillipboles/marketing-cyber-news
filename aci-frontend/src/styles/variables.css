@@ -320,8 +320,14 @@
 
   /* ---------------------------------------------------------------
      TYPOGRAPHY - Font Families (Fortified Horizon)
+     H1: Neue Haas Grotesk Display (Helvetica Neue fallback)
+     H2: Roboto Bold
+     Body/Paragraph: Roboto Regular
      --------------------------------------------------------------- */
-  --typography-font-family-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --typography-font-family-display: 'Neue Haas Grotesk Display', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+  --typography-font-family-heading: 'Roboto', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+  --typography-font-family-body: 'Roboto', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+  --typography-font-family-sans: 'Roboto', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
   --typography-font-family-mono: 'JetBrains Mono', 'Fira Code', monospace;
 
   /* ---------------------------------------------------------------
@@ -335,10 +341,12 @@
   --typography-font-size-2xl: 1.5rem;   /* 24px */
   --typography-font-size-3xl: 1.875rem; /* 30px */
   --typography-font-size-4xl: 2.25rem;  /* 36px */
+  --typography-font-size-5xl: 3rem;     /* 48px */
 
   /* ---------------------------------------------------------------
      TYPOGRAPHY - Font Weights
      --------------------------------------------------------------- */
+  --typography-font-weight-light: 300;
   --typography-font-weight-normal: 400;
   --typography-font-weight-medium: 500;
   --typography-font-weight-semibold: 600;
@@ -357,6 +365,67 @@
   --typography-letter-spacing-tight: -0.01em;
   --typography-letter-spacing-normal: 0em;
   --typography-letter-spacing-wide: 0.025em;
+  --typography-letter-spacing-caps: 0.1em;
+
+  /* ---------------------------------------------------------------
+     TYPOGRAPHY - Semantic Text Colors
+     --------------------------------------------------------------- */
+  --typography-color-primary: #303030;
+  --typography-color-secondary: #000000;
+  --typography-color-muted: #757575;
+
+  /* ---------------------------------------------------------------
+     TYPOGRAPHY - Semantic Styles (H1, H2, Paragraph, etc.)
+     These combine font-family, size, weight, line-height, color
+     --------------------------------------------------------------- */
+  /* H1 - Display heading */
+  --typography-h1-font-family: var(--typography-font-family-display);
+  --typography-h1-font-size: var(--typography-font-size-4xl);
+  --typography-h1-font-weight: var(--typography-font-weight-bold);
+  --typography-h1-line-height: var(--typography-line-height-tight);
+  --typography-h1-letter-spacing: var(--typography-letter-spacing-tight);
+  --typography-h1-color: var(--typography-color-primary);
+
+  /* H2 - Section heading */
+  --typography-h2-font-family: var(--typography-font-family-heading);
+  --typography-h2-font-size: var(--typography-font-size-3xl);
+  --typography-h2-font-weight: var(--typography-font-weight-bold);
+  --typography-h2-line-height: var(--typography-line-height-tight);
+  --typography-h2-letter-spacing: var(--typography-letter-spacing-normal);
+  --typography-h2-color: var(--typography-color-primary);
+
+  /* H3 - Subsection heading */
+  --typography-h3-font-family: var(--typography-font-family-heading);
+  --typography-h3-font-size: var(--typography-font-size-2xl);
+  --typography-h3-font-weight: var(--typography-font-weight-bold);
+  --typography-h3-line-height: var(--typography-line-height-tight);
+  --typography-h3-letter-spacing: var(--typography-letter-spacing-normal);
+  --typography-h3-color: var(--typography-color-primary);
+
+  /* Paragraph - Body text */
+  --typography-paragraph-font-family: var(--typography-font-family-body);
+  --typography-paragraph-font-size: var(--typography-font-size-base);
+  --typography-paragraph-font-weight: var(--typography-font-weight-normal);
+  --typography-paragraph-line-height: var(--typography-line-height-normal);
+  --typography-paragraph-letter-spacing: var(--typography-letter-spacing-normal);
+  --typography-paragraph-color: var(--typography-color-primary);
+
+  /* Intro - Lead paragraph after title */
+  --typography-intro-font-family: var(--typography-font-family-body);
+  --typography-intro-font-size: var(--typography-font-size-xl);
+  --typography-intro-font-weight: var(--typography-font-weight-light);
+  --typography-intro-line-height: var(--typography-line-height-relaxed);
+  --typography-intro-letter-spacing: var(--typography-letter-spacing-normal);
+  --typography-intro-color: var(--typography-color-primary);
+
+  /* Overline - Small title above H1/H2 */
+  --typography-overline-font-family: var(--typography-font-family-body);
+  --typography-overline-font-size: var(--typography-font-size-sm);
+  --typography-overline-font-weight: var(--typography-font-weight-normal);
+  --typography-overline-line-height: var(--typography-line-height-normal);
+  --typography-overline-letter-spacing: var(--typography-letter-spacing-caps);
+  --typography-overline-text-transform: uppercase;
+  --typography-overline-color: var(--typography-color-muted);
 
   /* ---------------------------------------------------------------
      SPACING - Base Scale (4px/0.25rem grid)

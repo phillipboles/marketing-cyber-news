@@ -185,9 +185,10 @@ function PriorityGroup({
               height: '32px',
               borderRadius: 'var(--border-radius-sm)',
               backgroundColor: colors.background.secondary,
+              color: colors.text.secondary,
             }}
           >
-            <Icon size={16} aria-hidden="true" style={{ color: colors.text.secondary }} />
+            <Icon size={16} aria-hidden={true} />
           </div>
 
           <div
@@ -229,11 +230,13 @@ function PriorityGroup({
           </div>
         </div>
 
-        {isOpen ? (
-          <ChevronUp size={20} aria-hidden="true" style={{ color: colors.text.secondary }} />
-        ) : (
-          <ChevronDown size={20} aria-hidden="true" style={{ color: colors.text.secondary }} />
-        )}
+        <span style={{ color: colors.text.secondary }}>
+          {isOpen ? (
+            <ChevronUp size={20} aria-hidden={true} />
+          ) : (
+            <ChevronDown size={20} aria-hidden={true} />
+          )}
+        </span>
       </button>
 
       {/* Group Content */}
@@ -278,9 +281,10 @@ function PriorityGroup({
                     borderRadius: 'var(--border-radius-sm)',
                     backgroundColor: colors.background.elevated,
                     flexShrink: 0,
+                    color: colors.text.muted,
                   }}
                 >
-                  <CategoryIcon size={12} aria-hidden="true" style={{ color: colors.text.muted }} />
+                  <CategoryIcon size={12} aria-hidden={true} />
                 </div>
 
                 {/* Content */}

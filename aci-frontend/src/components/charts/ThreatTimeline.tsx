@@ -138,27 +138,27 @@ const CustomTooltipContent: React.FC<{ data: TooltipData }> = ({ data }) => {
       role="tooltip"
     >
       <div style={{ fontWeight: 600, marginBottom: '4px' }}>{data?.key || 'Unknown'}</div>
-      {isLineChart && (
+      {isLineChart && typeof data.data === 'number' && (
         <>
           <div style={{ color: colors.text.secondary }}>
-            Total: <strong>{data.data}</strong>
+            Total: <strong>{data.data as number}</strong>
           </div>
-          {metadata.critical > 0 && (
+          {(metadata.critical ?? 0) > 0 && (
             <div style={{ color: colors.severity.critical, fontSize: '12px' }}>
               Critical: {metadata.critical}
             </div>
           )}
-          {metadata.high > 0 && (
+          {(metadata.high ?? 0) > 0 && (
             <div style={{ color: colors.severity.high, fontSize: '12px' }}>
               High: {metadata.high}
             </div>
           )}
-          {metadata.medium > 0 && (
+          {(metadata.medium ?? 0) > 0 && (
             <div style={{ color: colors.severity.medium, fontSize: '12px' }}>
               Medium: {metadata.medium}
             </div>
           )}
-          {metadata.low > 0 && (
+          {(metadata.low ?? 0) > 0 && (
             <div style={{ color: colors.severity.low, fontSize: '12px' }}>
               Low: {metadata.low}
             </div>
@@ -287,7 +287,7 @@ export const ThreatTimeline: React.FC<ThreatTimelineProps> = ({
                 <TooltipArea
                   tooltip={
                     <ChartTooltip
-                      content={(point: ChartDataShape) => <CustomTooltipContent data={point.data} />}
+                      content={(point: ChartDataShape) => <CustomTooltipContent data={point as unknown as TooltipData} />}
                     />
                   }
                 />
@@ -328,7 +328,7 @@ export const ThreatTimeline: React.FC<ThreatTimelineProps> = ({
                 <TooltipArea
                   tooltip={
                     <ChartTooltip
-                      content={(point: ChartDataShape) => <CustomTooltipContent data={point.data} />}
+                      content={(point: ChartDataShape) => <CustomTooltipContent data={point as unknown as TooltipData} />}
                     />
                   }
                 />

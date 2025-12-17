@@ -1,5 +1,8 @@
 /* Fortified Horizon Theme - Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+/* H1: Neue Haas Grotesk Display (fallback: Helvetica Neue) */
+/* H2: Roboto Bold */
+/* Body: Roboto Regular */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
 /* Import Fortified Horizon design tokens */
@@ -27,7 +30,7 @@
 }
 
 .animate-slide-in {
-  animation: slide-in 0.3s ease-out;
+  animation: slide-in var(--motion-duration-normal) var(--motion-easing-out);
 }
 
 /* Custom scrollbar - Fortified Horizon Theme */
@@ -190,10 +193,101 @@
 
   /* Apply Fortified Horizon page gradient background */
   body {
-    font-family: var(--typography-font-family-sans);
+    font-family: var(--typography-font-family-body);
     background: var(--gradient-page);
     min-height: 100vh;
-    color: var(--color-text-primary);
+    color: var(--typography-color-primary);
     line-height: var(--typography-line-height-normal);
   }
+
+  /* ---------------------------------------------------------------
+     TYPOGRAPHY - Base HTML Element Styles
+     All values use CSS variables for easy re-theming
+     --------------------------------------------------------------- */
+
+  /* H1 - Display heading: Neue Haas Grotesk Display */
+  h1 {
+    font-family: var(--typography-h1-font-family);
+    font-size: var(--typography-h1-font-size);
+    font-weight: var(--typography-h1-font-weight);
+    line-height: var(--typography-h1-line-height);
+    letter-spacing: var(--typography-h1-letter-spacing);
+    color: var(--typography-h1-color);
+  }
+
+  /* H2 - Section heading: Roboto Bold */
+  h2 {
+    font-family: var(--typography-h2-font-family);
+    font-size: var(--typography-h2-font-size);
+    font-weight: var(--typography-h2-font-weight);
+    line-height: var(--typography-h2-line-height);
+    letter-spacing: var(--typography-h2-letter-spacing);
+    color: var(--typography-h2-color);
+  }
+
+  /* H3 - Subsection heading: Roboto Bold */
+  h3 {
+    font-family: var(--typography-h3-font-family);
+    font-size: var(--typography-h3-font-size);
+    font-weight: var(--typography-h3-font-weight);
+    line-height: var(--typography-h3-line-height);
+    letter-spacing: var(--typography-h3-letter-spacing);
+    color: var(--typography-h3-color);
+  }
+
+  /* H4-H6 - Additional headings: Roboto */
+  h4, h5, h6 {
+    font-family: var(--typography-font-family-heading);
+    font-weight: var(--typography-font-weight-bold);
+    line-height: var(--typography-line-height-tight);
+    color: var(--typography-color-primary);
+  }
+
+  h4 { font-size: var(--typography-font-size-xl); }
+  h5 { font-size: var(--typography-font-size-lg); }
+  h6 { font-size: var(--typography-font-size-base); }
+
+  /* Paragraph - Body text: Roboto Regular */
+  p {
+    font-family: var(--typography-paragraph-font-family);
+    font-size: var(--typography-paragraph-font-size);
+    font-weight: var(--typography-paragraph-font-weight);
+    line-height: var(--typography-paragraph-line-height);
+    letter-spacing: var(--typography-paragraph-letter-spacing);
+    color: var(--typography-paragraph-color);
+  }
+}
+
+/* ---------------------------------------------------------------
+   TYPOGRAPHY - Utility Classes
+   --------------------------------------------------------------- */
+
+/* Intro - Lead paragraph after title (20px, font-weight 300) */
+.text-intro {
+  font-family: var(--typography-intro-font-family);
+  font-size: var(--typography-intro-font-size);
+  font-weight: var(--typography-intro-font-weight);
+  line-height: var(--typography-intro-line-height);
+  letter-spacing: var(--typography-intro-letter-spacing);
+  color: var(--typography-intro-color);
+}
+
+/* Overline - Small title above H1/H2 (All caps, Roboto Regular, #757575) */
+.text-overline {
+  font-family: var(--typography-overline-font-family);
+  font-size: var(--typography-overline-font-size);
+  font-weight: var(--typography-overline-font-weight);
+  line-height: var(--typography-overline-line-height);
+  letter-spacing: var(--typography-overline-letter-spacing);
+  text-transform: var(--typography-overline-text-transform);
+  color: var(--typography-overline-color);
+}
+
+/* Display text - For extra large headings */
+.text-display {
+  font-family: var(--typography-font-family-display);
+  font-size: var(--typography-font-size-5xl);
+  font-weight: var(--typography-font-weight-bold);
+  line-height: var(--typography-line-height-tight);
+  letter-spacing: var(--typography-letter-spacing-tight);
 }

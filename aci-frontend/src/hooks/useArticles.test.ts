@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { mockArticles, createMockPaginatedResponse } from '../test/mocks';
+import { mockArticles } from '../test/mocks';
 
 describe('useArticles Hook', () => {
   beforeEach(() => {

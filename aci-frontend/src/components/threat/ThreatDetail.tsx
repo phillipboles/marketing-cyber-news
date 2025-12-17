@@ -286,7 +286,7 @@ export function ThreatDetail({
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: spacing[2] }}>
-            <Shield size={20} style={{ color: colors.accent.primary }} aria-hidden="true" />
+            <Shield size={20} color={colors.accent.armorBlue} aria-hidden="true" />
             <h2
               style={{
                 fontSize: typography.fontSize.xl,
@@ -320,8 +320,8 @@ export function ThreatDetail({
                   alignItems: 'center',
                   gap: spacing[2],
                   padding: `${spacing[2]} ${spacing[4]}`,
-                  backgroundColor: colors.accent.primary + '20',
-                  color: colors.accent.primary,
+                  backgroundColor: colors.accent.armorBlue + '20',
+                  color: colors.accent.armorBlue,
                   borderRadius: 'var(--border-radius-full)',
                   fontSize: typography.fontSize.sm,
                   fontWeight: typography.fontWeight.medium,
@@ -350,7 +350,7 @@ export function ThreatDetail({
                   gap: spacing[2],
                 }}
               >
-                <AlertTriangle size={14} style={{ color: colors.semantic.warning }} aria-hidden="true" />
+                <AlertTriangle size={14} color={colors.semantic.warning} aria-hidden="true" />
                 Attack Vector
               </h3>
               <p
@@ -384,7 +384,7 @@ export function ThreatDetail({
               <div
                 style={{
                   padding: spacing[4],
-                  backgroundColor: colors.background.default,
+                  backgroundColor: colors.background.primary,
                   borderRadius: 'var(--border-radius-md)',
                   borderLeft: `4px solid ${colors.semantic.error}`,
                 }}
@@ -436,14 +436,14 @@ export function ThreatDetail({
                       alignItems: 'flex-start',
                       gap: spacing[3],
                       padding: spacing[3],
-                      backgroundColor: colors.background.default,
+                      backgroundColor: colors.background.primary,
                       borderRadius: 'var(--border-radius-md)',
                     }}
                   >
                     <CheckCircle2
                       size={18}
+                      color={colors.semantic.success}
                       style={{
-                        color: colors.semantic.success,
                         flexShrink: 0,
                         marginTop: '2px',
                       }}

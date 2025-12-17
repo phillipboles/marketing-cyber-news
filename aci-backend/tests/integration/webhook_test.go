@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/phillipboles/aci-backend/internal/ai"
 	"github.com/phillipboles/aci-backend/internal/api/handlers"
 	"github.com/phillipboles/aci-backend/internal/domain"
 	"github.com/phillipboles/aci-backend/internal/repository/postgres"
@@ -120,9 +121,23 @@ func setupWebhookHandler(t *testing.T, db *TestDB) *handlers.WebhookHandler {
 		webhookLogRepo,
 	)
 
+	// Create AI client for enrichment service (with dummy API key for testing)
+	// Most webhook tests don't actually call enrichment, so this won't make real API calls
+	aiClient, err := ai.NewClient(ai.Config{
+		APIKey: "test-api-key-placeholder",
+		Model:  "claude-3-haiku-20240307",
+	})
+	if err != nil {
+		t.Fatalf("failed to create AI client: %v", err)
+	}
+
+	enricher := ai.NewEnricher(aiClient)
+	enrichmentService := service.NewEnrichmentService(enricher, articleRepo)
+
 	// Create webhook handler
 	return handlers.NewWebhookHandler(
 		articleService,
+		enrichmentService,
 		webhookLogRepo,
 		testWebhookSecret,
 	)

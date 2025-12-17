@@ -373,7 +373,7 @@ export function ThreatDetailPage(): ReactElement {
             border: `1px solid ${colors.border.default}`,
           }}
         >
-          <ExternalLink size={16} style={{ color: colors.accent.primary }} aria-hidden="true" />
+          <ExternalLink size={16} style={{ color: colors.accent.armorBlue }} aria-hidden="true" />
           <span
             style={{
               fontSize: typography.fontSize.sm,
@@ -389,7 +389,7 @@ export function ThreatDetailPage(): ReactElement {
             rel="noopener noreferrer"
             style={{
               fontSize: typography.fontSize.sm,
-              color: colors.accent.primary,
+              color: colors.accent.armorBlue,
               textDecoration: 'none',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
@@ -449,7 +449,7 @@ export function ThreatDetailPage(): ReactElement {
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: spacing[2] }}>
-            <Shield size={20} style={{ color: colors.accent.primary }} aria-hidden="true" />
+            <Shield size={20} style={{ color: colors.accent.armorBlue }} aria-hidden="true" />
             <h2
               style={{
                 fontSize: typography.fontSize.xl,
@@ -483,8 +483,8 @@ export function ThreatDetailPage(): ReactElement {
                   alignItems: 'center',
                   gap: spacing[2],
                   padding: `${spacing[2]} ${spacing[4]}`,
-                  backgroundColor: `${colors.accent.primary}20`,
-                  color: colors.accent.primary,
+                  backgroundColor: `${colors.accent.armorBlue}20`,
+                  color: colors.accent.armorBlue,
                   borderRadius: '9999px',
                   fontSize: typography.fontSize.sm,
                   fontWeight: typography.fontWeight.medium,
@@ -547,7 +547,7 @@ export function ThreatDetailPage(): ReactElement {
               <div
                 style={{
                   padding: spacing[4],
-                  backgroundColor: colors.background.default,
+                  backgroundColor: colors.background.primary,
                   borderRadius: '8px',
                   borderLeft: `4px solid ${colors.semantic.error}`,
                 }}
@@ -599,7 +599,7 @@ export function ThreatDetailPage(): ReactElement {
                       alignItems: 'flex-start',
                       gap: spacing[3],
                       padding: spacing[3],
-                      backgroundColor: colors.background.default,
+                      backgroundColor: colors.background.primary,
                       borderRadius: '8px',
                     }}
                   >

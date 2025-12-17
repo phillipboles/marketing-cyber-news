@@ -3,7 +3,7 @@
  * Hook manages WebSocket connection for real-time updates
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, vi, beforeEach, afterEach } from 'vitest';
 
 describe('useWebSocket Hook', () => {
   beforeEach(() => {

@@ -171,9 +171,10 @@ export function ExternalReferencesList({
                   borderRadius: 'var(--border-radius-sm)',
                   backgroundColor: colors.background.secondary,
                   flexShrink: 0,
+                  color: colors.text.secondary,
                 }}
               >
-                <Icon size={16} aria-hidden="true" style={{ color: colors.text.secondary }} />
+                <Icon size={16} aria-hidden={true} />
               </div>
 
               {/* Content */}
@@ -207,7 +208,7 @@ export function ExternalReferencesList({
                   <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {reference.title}
                   </span>
-                  <ExternalLink size={14} aria-hidden="true" style={{ flexShrink: 0 }} />
+                  <ExternalLink size={14} aria-hidden={true} style={{ flexShrink: 0 }} />
                 </a>
 
                 {/* Source and Type Badges */}
@@ -268,12 +269,12 @@ export function ExternalReferencesList({
         >
           {isExpanded ? (
             <>
-              <ChevronUp size={16} aria-hidden="true" />
+              <ChevronUp size={16} aria-hidden={true} />
               <span>Show Less</span>
             </>
           ) : (
             <>
-              <ChevronDown size={16} aria-hidden="true" />
+              <ChevronDown size={16} aria-hidden={true} />
               <span>Show {hiddenCount} more</span>
             </>
           )}

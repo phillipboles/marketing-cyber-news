@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test } from '@playwright/test';
 
 test.describe('Debug React Mount Issue', () => {
   test('capture all messages after login and threats navigation', async ({ page }) => {

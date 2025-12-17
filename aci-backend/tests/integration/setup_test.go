@@ -21,6 +21,7 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5/stdlib"
+	"github.com/phillipboles/aci-backend/internal/ai"
 	"github.com/phillipboles/aci-backend/internal/api"
 	"github.com/phillipboles/aci-backend/internal/api/handlers"
 	"github.com/phillipboles/aci-backend/internal/pkg/jwt"
@@ -358,13 +359,27 @@ func SetupTestServer(t *testing.T, testDB *TestDB) *TestServer {
 	searchService := service.NewSearchService(articleRepo)
 	engagementService := service.NewEngagementService(bookmarkRepo, articleReadRepo, articleRepo)
 
+	// Create AI client for enrichment service (with dummy API key for testing)
+	// Most integration tests don't actually call enrichment, so this won't make real API calls
+	aiClient, err := ai.NewClient(ai.Config{
+		APIKey: "test-api-key-placeholder",
+		Model:  "claude-3-haiku-20240307",
+	})
+	if err != nil {
+		TeardownTestKeys(t, keys)
+		t.Fatalf("failed to create AI client: %v", err)
+	}
+
+	enricher := ai.NewEnricher(aiClient)
+	enrichmentService := service.NewEnrichmentService(enricher, articleRepo)
+
 	// Create handlers
 	authHandler := handlers.NewAuthHandler(authService)
 	articleHandler := handlers.NewArticleHandler(articleRepo, searchService, engagementService)
 	alertHandler := handlers.NewAlertHandler(alertService)
 	categoryHandler := handlers.NewCategoryHandler(categoryRepo, articleRepo)
 	userHandler := handlers.NewUserHandler(engagementService, userRepo)
-	webhookHandler := handlers.NewWebhookHandler(articleService, webhookLogRepo, "test-webhook-secret")
+	webhookHandler := handlers.NewWebhookHandler(articleService, enrichmentService, webhookLogRepo, "test-webhook-secret")
 
 	// Create Handlers struct
 	h := &api.Handlers{

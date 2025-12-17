@@ -477,19 +477,18 @@ describe('ThreatTimeline Component', () => {
     });
 
     it('should accept optional showBreakdown prop', () => {
-      const mockData = generateMockTimelineData(7);
-
       // Component should accept boolean prop
+      // const mockData = generateMockTimelineData(7);
       // render(<ThreatTimeline data={mockData} showBreakdown={true} />);
       // render(<ThreatTimeline data={mockData} showBreakdown={false} />);
     });
 
     it('should accept optional height prop', () => {
-      const mockData = generateMockTimelineData(7);
       const validHeights = [200, 300, 400, 500];
 
       validHeights.forEach((height) => {
         expect(height).toBeGreaterThan(0);
+        // const mockData = generateMockTimelineData(7);
         // render(<ThreatTimeline data={mockData} height={height} />);
       });
     });

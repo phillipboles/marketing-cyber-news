@@ -273,7 +273,7 @@ CREATE INDEX idx_article_approvals_gate ON article_approvals(gate);
 
 ### Measurable Outcomes
 
-- **SC-001**: Approvers can view and action their queue in under 2 seconds
+- **SC-001**: Approvers can view and action their queue with p95 latency under 2 seconds
 - **SC-002**: Approval/rejection actions complete in under 1 second
 - **SC-003**: System correctly enforces role-based access 100% of the time
 - **SC-004**: All approval actions create audit log entries within 100ms

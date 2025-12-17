@@ -122,12 +122,14 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload, total })
 
 /**
  * Chart data entry type
+ * Index signature required for Recharts compatibility (ChartDataInput = Record<string, unknown>)
  */
 interface ChartDataEntry {
   label: string;
   value: number;
   severity: Severity;
   color: string;
+  [key: string]: unknown;
 }
 
 /**

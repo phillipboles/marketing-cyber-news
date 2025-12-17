@@ -629,29 +629,7 @@ function generateTimeline(): readonly TimelineEvent[] {
 function generateDeepDive(category: ThreatCategory, index: number, isPremium: boolean): DeepDive {
   const isLocked = !isPremium;
 
-  return {
-    isAvailable: true,
-    isLocked,
-    preview: isLocked
-      ? 'Unlock premium content to access detailed technical analysis, MITRE ATT&CK mappings, indicators of compromise, and step-by-step remediation guidance.'
-      : undefined,
-    ...(isPremium && {
-      technicalAnalysis: {
-        attackVector: 'Network-based exploitation via exposed web service',
-        exploitationMethod: 'Remote code execution through deserialization vulnerability',
-        affectedSystems: ['Apache Struts 2.x', 'Java-based web applications', 'Linux/Windows servers'],
-        prerequisites: ['Exposed web service', 'Vulnerable Struts version', 'Network accessibility'],
-        detectionMethods: [
-          'Monitor for suspicious HTTP requests with serialized Java objects',
-          'Detect abnormal process execution from web server processes',
-          'Network IDS signatures for known exploit patterns',
-          'File integrity monitoring for web application directories',
-        ],
-      },
-      mitreTechniques: MITRE_TECHNIQUES.slice(0, 5),
-      iocs: generateIOCs(category, index),
-      timeline: generateTimeline(category, index),
-      detailedRemediation: `
+  const detailedRemediationContent = `
 ## Step-by-Step Remediation
 
 ### Immediate Actions (0-24 hours)
@@ -701,8 +679,9 @@ function generateDeepDive(category: ThreatCategory, index: number, isPremium: bo
    - Security awareness training for staff
    - Tabletop exercises for incident response team
    - Regular security briefings for leadership
-      `.trim(),
-      executiveSummary: `
+  `.trim();
+
+  const executiveSummaryContent = `
 ## Executive Summary
 
 ### Threat Overview
@@ -724,7 +703,33 @@ A critical security vulnerability has been identified that poses significant ris
 - Immediate: 24 hours for critical patching
 - Short-term: 7 days for comprehensive security review
 - Long-term: 90 days for process improvements
-      `.trim(),
+  `.trim();
+
+  return {
+    isAvailable: true,
+    isLocked,
+    preview: isLocked
+      ? 'Unlock premium content to access detailed technical analysis, MITRE ATT&CK mappings, indicators of compromise, and step-by-step remediation guidance.'
+      : undefined,
+    mitreTechniques: isPremium ? MITRE_TECHNIQUES.slice(0, 5) : [],
+    iocs: isPremium ? generateIOCs(category) : [],
+    timeline: isPremium ? generateTimeline() : [],
+    detailedRemediation: isPremium ? detailedRemediationContent : '',
+    executiveSummary: isPremium ? executiveSummaryContent : '',
+    relatedThreats: isPremium ? [`threat-${String(((index + 5) % 60) + 1).padStart(3, '0')}`, `threat-${String(((index + 10) % 60) + 1).padStart(3, '0')}`] : [],
+    ...(isPremium && {
+      technicalAnalysis: {
+        attackVector: 'Network-based exploitation via exposed web service',
+        exploitationMethod: 'Remote code execution through deserialization vulnerability',
+        affectedSystems: ['Apache Struts 2.x', 'Java-based web applications', 'Linux/Windows servers'],
+        prerequisites: ['Exposed web service', 'Vulnerable Struts version', 'Network accessibility'],
+        detectionMethods: [
+          'Monitor for suspicious HTTP requests with serialized Java objects',
+          'Detect abnormal process execution from web server processes',
+          'Network IDS signatures for known exploit patterns',
+          'File integrity monitoring for web application directories',
+        ],
+      },
       threatActorProfile: `
 ## Threat Actor Profile
 
@@ -745,7 +750,6 @@ This activity is attributed to APT29 (Cozy Bear), a sophisticated threat group b
 ### Motivation
 Primary motivation appears to be cyber espionage and intelligence collection in support of national security objectives.
       `.trim(),
-      relatedThreats: [`threat-${String(((index + 5) % 60) + 1).padStart(3, '0')}`, `threat-${String(((index + 10) % 60) + 1).padStart(3, '0')}`],
     }),
   };
 }
@@ -906,7 +910,7 @@ function generateThreat(index: number, full: boolean = false): Threat | ThreatSu
     const externalReferences = EXTERNAL_REFERENCES.slice(refsStart, refsStart + refCount);
 
     // Generate recommendations based on category
-    const recommendations = generateRecommendations(template.category, index);
+    const recommendations = generateRecommendations(template.category);
 
     // Simulate premium access (50% of users have premium)
     const isPremium = index % 2 === 0;
